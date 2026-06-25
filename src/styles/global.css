@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  color: #17223b;
+  background: #f6f4ee;
+}
+
+a {
+  color: inherit;
+}
+
+.hero-section {
+  min-height: calc(100vh - 72px);
+  background-position: center;
+  background-size: cover;
+}
+
+.hero-overlay {
+  min-height: calc(100vh - 72px);
+  background:
+    linear-gradient(90deg, rgba(18, 33, 55, 0.78) 0%, rgba(18, 33, 55, 0.58) 42%, rgba(18, 33, 55, 0.16) 100%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.15) 0%, rgba(246, 244, 238, 0.92) 100%);
+}
+
+.hero-title {
+  max-width: 780px;
+  font-size: clamp(42px, 6vw, 74px) !important;
+  line-height: 0.98 !important;
+  letter-spacing: 0 !important;
+}
+
+.booking-panel {
+  border: 1px solid rgba(226, 232, 240, 0.95);
+}
+
+.metric-tile {
+  min-height: 94px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 8px;
+  padding: 14px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+}
+
+.metric-tile .ant-statistic-content {
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.metric-tile span {
+  display: block;
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.service-card {
+  display: flex;
+  min-height: 292px;
+  border: 1px solid #e7e2d8;
+}
+
+.service-card .ant-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.service-card-selected {
+  border-color: #2f7d67;
+  box-shadow: 0 16px 36px rgba(47, 125, 103, 0.16);
+}
+
+.dashboard-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 8px;
+  color: #2f7d67;
+  background: #eaf5ef;
+  font-size: 24px;
+}
+
+.dashboard-icon.amber {
+  color: #b7791f;
+  background: #fff2d6;
+}
+
+.dashboard-icon.blue {
+  color: #445c8f;
+  background: #eef3ff;
+}
+
+.promo-icon {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border-radius: 8px;
+  background: #f6f4ee;
+  font-size: 26px;
+}
+
+@media (max-width: 767px) {
+  .hero-section,
+  .hero-overlay {
+    min-height: auto;
+  }
+
+  .hero-overlay {
+    background:
+      linear-gradient(180deg, rgba(18, 33, 55, 0.84) 0%, rgba(18, 33, 55, 0.58) 56%, rgba(246, 244, 238, 0.96) 100%);
+  }
+
+  .hero-title {
+    font-size: 40px !important;
+  }
+
+  .metric-tile {
+    min-height: 86px;
+    padding: 10px;
+  }
+}
