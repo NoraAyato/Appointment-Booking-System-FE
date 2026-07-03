@@ -14,7 +14,6 @@ import {
   Input,
   Modal,
   Row,
-  Select,
   Space,
   Tag,
   Tooltip,
@@ -26,6 +25,7 @@ import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 
 import { DashboardPage } from '@/features/dashboard/components/DashboardPage';
+import { AppSelect } from '@/shared/components/AppSelect';
 import { DataTable } from '@/shared/components/DataTable';
 import { useTable } from '@/shared/hooks/useTable';
 import { getApiErrorMessage } from '@/shared/utils/api-error';
@@ -311,12 +311,16 @@ export function AdminUsersPage() {
               </Col>
               <Col xs={24} sm={12} lg={5}>
                 <Form.Item name="role" label="Vai trò" className="!mb-0">
-                  <Select allowClear options={ADMIN_USER_ROLE_OPTIONS} placeholder="Tất cả vai trò" />
+                  <AppSelect
+                    allowClear
+                    options={ADMIN_USER_ROLE_OPTIONS}
+                    placeholder="Tất cả vai trò"
+                  />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12} lg={5}>
                 <Form.Item name="status" label="Trạng thái" className="!mb-0">
-                  <Select
+                  <AppSelect
                     allowClear
                     options={ADMIN_USER_STATUS_OPTIONS}
                     placeholder="Tất cả trạng thái"
@@ -373,14 +377,14 @@ export function AdminUsersPage() {
             label="Vai trò"
             rules={[{ required: true, message: 'Vui lòng chọn vai trò.' }]}
           >
-            <Select options={ADMIN_USER_ROLE_OPTIONS} placeholder="Chọn vai trò" />
+            <AppSelect options={ADMIN_USER_ROLE_OPTIONS} placeholder="Chọn vai trò" />
           </Form.Item>
           <Form.Item
             name="status"
             label="Trạng thái"
             rules={[{ required: true, message: 'Vui lòng chọn trạng thái.' }]}
           >
-            <Select options={ADMIN_USER_STATUS_OPTIONS} placeholder="Chọn trạng thái" />
+            <AppSelect options={ADMIN_USER_STATUS_OPTIONS} placeholder="Chọn trạng thái" />
           </Form.Item>
         </Form>
       </Modal>

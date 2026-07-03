@@ -17,7 +17,6 @@ import {
   InputNumber,
   Modal,
   Radio,
-  Select,
   Space,
   Tag,
   Tooltip,
@@ -30,6 +29,7 @@ import type { UploadFile } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { DashboardPage } from '@/features/dashboard/components/DashboardPage';
+import { AppSelect } from '@/shared/components/AppSelect';
 import { DataTable } from '@/shared/components/DataTable';
 import { useTable } from '@/shared/hooks/useTable';
 import { getApiErrorMessage } from '@/shared/utils/api-error';
@@ -378,7 +378,7 @@ export function AdminServicesPage() {
                 <Input allowClear placeholder="Tên hoặc mô tả dịch vụ" prefix={<SearchOutlined />} />
               </Form.Item>
               <Form.Item name="status" label="Trạng thái" className="!mb-0 md:w-[220px]">
-                <Select
+                <AppSelect
                   allowClear
                   options={ADMIN_SERVICE_STATUS_OPTIONS}
                   placeholder="Tất cả trạng thái"
@@ -473,12 +473,10 @@ export function AdminServicesPage() {
               label="Danh mục"
               rules={[{ required: true, message: 'Vui lòng chọn danh mục.' }]}
             >
-              <Select
+              <AppSelect
                 loading={categoryLoading}
                 options={modalMode === 'create' ? createCategoryOptions : updateCategoryOptions}
                 placeholder="Chọn danh mục"
-                showSearch
-                optionFilterProp="label"
               />
             </Form.Item>
             {modalMode === 'update' ? (
@@ -487,7 +485,7 @@ export function AdminServicesPage() {
                 label="Trạng thái"
                 rules={[{ required: true, message: 'Vui lòng chọn trạng thái.' }]}
               >
-                <Select options={ADMIN_SERVICE_STATUS_OPTIONS} placeholder="Chọn trạng thái" />
+                <AppSelect options={ADMIN_SERVICE_STATUS_OPTIONS} placeholder="Chọn trạng thái" />
               </Form.Item>
             ) : null}
           </div>
