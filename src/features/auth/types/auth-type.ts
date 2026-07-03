@@ -1,16 +1,25 @@
-export type UserRole = 'customer' | 'staff' | 'admin';
+﻿export type AuthMode = 'login' | 'forgot-password' | 'register';
 
-export interface User {
-  id: string;
-  fullName: string;
-  email: string;
-  role: UserRole;
-  avatarUrl: string;
-  phone: string;
-}
-
-export interface LoginPayload {
+export interface BaseAuthPayload {
   email: string;
   password: string;
-  role: UserRole;
+}
+export interface LoginPayload extends BaseAuthPayload {
+  rememberMe?: boolean;
+}
+
+export interface RegisterPayload extends BaseAuthPayload {
+  repeatPassword: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface AuthTokenData {
+  accessToken: string;
+  refreshToken: string | null;
+  tokenType: string;
 }

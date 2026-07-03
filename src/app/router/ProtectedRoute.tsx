@@ -1,8 +1,8 @@
-import { Result } from 'antd';
+﻿import { Result } from 'antd';
 import { Navigate } from 'react-router-dom';
 
 import { useAppSelector } from '@/app/redux/hooks';
-import type { UserRole } from '@/features/auth/types/auth-type';
+import type { UserRole } from '@/features/users/types/user-type';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -30,3 +30,4 @@ export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
 
   return children;
 }
+

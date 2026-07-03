@@ -1,54 +1,24 @@
-import type { LoginPayload, User } from '../types/auth-type';
+﻿import { axiosClient } from '@/shared/lib/axios';
+import type { ApiResponse } from '@/shared/types/api-type';
 
-const MOCK_USERS: Record<LoginPayload['role'], User> = {
-  customer: {
-    id: 'usr-001',
-    fullName: 'Minh Anh',
-    email: 'customer@yoedu.vn',
-    role: 'customer',
-    avatarUrl: 'https://i.pravatar.cc/120?img=47',
-    phone: '090 234 8899',
-  },
-  staff: {
-    id: 'usr-102',
-    fullName: 'Hoàng Staff',
-    email: 'staff@yoedu.vn',
-    role: 'staff',
-    avatarUrl: 'https://i.pravatar.cc/120?img=12',
-    phone: '090 811 7722',
-  },
-  admin: {
-    id: 'usr-900',
-    fullName: 'Linh Admin',
-    email: 'admin@yoedu.vn',
-    role: 'admin',
-    avatarUrl: 'https://i.pravatar.cc/120?img=32',
-    phone: '091 555 1188',
-  },
-};
-
-const delay = (duration = 450) => new Promise((resolve) => window.setTimeout(resolve, duration));
+import type { AuthTokenData, LoginPayload, RegisterPayload } from '../types/auth-type';
 
 export const authApi = {
   login: async (payload: LoginPayload) => {
-    await delay();
+    const response = await axiosClient.post<ApiResponse<AuthTokenData>>('/auth/login', payload);
 
-    if (!payload.email || !payload.password) {
-      throw new Error('Vui lòng nhập email và mật khẩu.');
-    }
+    return response.data;
+  },
 
-    return {
-      message: 'Đăng nhập thành công',
-      data: MOCK_USERS[payload.role],
-    };
+  register: async (payload: RegisterPayload) => {
+    const response = await axiosClient.post<ApiResponse<AuthTokenData>>('/auth/register', payload);
+
+    return response.data;
   },
 
   logout: async () => {
-    await delay(250);
+    const response = await axiosClient.post<ApiResponse<null>>('/auth/logout');
 
-    return {
-      message: 'Đã đăng xuất',
-      data: null,
-    };
+    return response.data;
   },
 };
