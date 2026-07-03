@@ -654,6 +654,75 @@ Agent nĂªn dá»«ng láº¡i vĂ  xem láº¡i thiáº¿t káº¿ náº¿u g
 9. Chá»‰ nĂ¢ng lĂªn `shared` khi abstraction tháº­t sá»± trung láº­p vĂ  láº·p á»Ÿ nhiá»u feature.
 10. Kiá»ƒm tra láº¡i import direction: `app -> features/shared`, `features -> shared`, `shared -> khĂ´ng phá»¥ thuá»™c features`.
 
+### 6.11. Rule ra quyết định trước khi tách shared component
+
+Trước khi triển khai hoặc mở rộng một page quản lý mới, agent phải làm một lượt "component pre-check".
+Mục tiêu là nhận ra sớm phần UI/hành vi có thể dùng chung, thay vì copy JSX giống nhau qua nhiều page rồi mới sửa.
+
+Pre-check bắt buộc:
+
+1. Liệt kê các khối UI page sẽ có: filter, table, pagination, action group, modal form, select list, upload, date/time picker, toast.
+2. So sánh với component/hook đang có trong `shared`: `DataTable`, `AppPagination`, `useTable`, form/modal/select custom nếu đã tồn tại.
+3. Nếu khác biệt chỉ là `label`, `placeholder`, `options`, `loading`, `allowClear`, `showSearch`, `columns`, `rowKey`, `onSubmit` hoặc `pagination`, ưu tiên mở rộng component shared bằng props trung lập.
+4. Nếu UI có business rule riêng của feature, giữ trong `features/<feature>/components` hoặc trong page khi còn nhỏ.
+5. Khi cùng một kiểu UI xuất hiện ở page thứ hai trở lên, phải cân nhắc tách shared ngay trong lần triển khai đó, trừ khi abstraction làm props bị gắn business.
+
+Quy tắc đặt tên component shared:
+
+- Tên theo UI trung lập: `AppSelect`, `SearchableSelect`, `FormSelect`, `DataTable`, `ActionGroup`.
+- Không đặt tên theo nghiệp vụ: `StaffSelect`, `ServiceStatusSelect`, `UserRoleSelect` trong `shared`.
+- Component shared không import từ `features/*`; option/data nghiệp vụ được truyền từ page hoặc từ API layer của feature.
+
+Nếu chưa tách shared, page vẫn phải viết theo cách dễ tách sau:
+
+- Dùng type option thống nhất `{ label: string; value: string | number }` khi phù hợp.
+- Không nhúng logic filter/search phức tạp trực tiếp lặp lại trong nhiều `<Select />`.
+- Không gọi API option ở constants top-level; page hoặc hook gọi API rồi truyền options vào component.
+
+### 6.12. Chuẩn Select list và search option
+
+Các select list trong form/filter quản lý phải có hành vi nhất quán. Khi dùng Ant Design `Select` trực tiếp hoặc component shared bọc `Select`, mặc định nên hỗ trợ:
+
+- `allowClear` cho filter field.
+- `showSearch` khi danh sách option có khả năng dài hoặc lấy từ API.
+- `optionFilterProp="label"` để tìm theo tên hiển thị của option.
+- `filterOption` trung lập để tìm theo cả `label` và `value` khi cần.
+- `loading` khi option lấy từ API.
+- `placeholder` rõ nghĩa: ví dụ `Tất cả trạng thái`, `Chọn nhân viên`, `Chọn danh mục`.
+
+Mẫu filter option dùng chung nên ưu tiên:
+
+```ts
+export const filterSelectOptionByLabelValue = (
+  input: string,
+  option?: { label?: React.ReactNode; value?: string | number },
+) => {
+  const keyword = input.trim().toLowerCase();
+  const label = String(option?.label ?? '').toLowerCase();
+  const value = String(option?.value ?? '').toLowerCase();
+
+  return label.includes(keyword) || value.includes(keyword);
+};
+```
+
+Khi tạo component shared cho select, nên thiết kế props dạng trung lập:
+
+```ts
+interface AppSelectProps<ValueType extends string | number = string> {
+  allowClear?: boolean;
+  loading?: boolean;
+  options: Array<{ label: React.ReactNode; value: ValueType }>;
+  placeholder?: string;
+  searchable?: boolean;
+}
+```
+
+Quy tắc sử dụng:
+
+- Option tĩnh như status/role đặt trong `features/<feature>/constants`.
+- Option lấy từ API như staff/category đặt trong feature API, page hoặc hook fetch rồi truyền vào select.
+- Với option "Tất cả", nếu backend mong không gửi field thì page phải map sentinel value thành `undefined` ở payload/filter layer, không để component shared biết nghiệp vụ đó.
+
 ## 7. State management
 
 DĂ¹ng state cá»¥c bá»™ khi dá»¯ liá»‡u:
@@ -897,6 +966,8 @@ cookie thĂ¬ xĂ³a cÆ¡ cháº¿ token hiá»‡n táº¡i sáº½ lĂ m to�
 - [ ] API call náº±m trong feature API layer vĂ  dĂ¹ng `axiosClient`.
 - [ ] Request/response/payload/filter cĂ³ type rĂµ rĂ ng, khĂ´ng thĂªm `any` tĂ¹y tiá»‡n.
 - [ ] ÄĂ£ tĂ¡i sá»­ dá»¥ng hook/component chung phĂ¹ há»£p.
+- [ ] ÄĂ£ lĂ m component pre-check: filter/table/modal/select/pagination cĂ³ nĂªn dĂ¹ng shared hoáº·c táº¡o shared khĂ´ng.
+- [ ] Select list cĂ³ `showSearch`/`optionFilterProp`/filter theo label-value khi danh sĂ¡ch option cĂ³ thá»ƒ dĂ i.
 - [ ] Page chá»‰ phá»‘i há»£p UI vĂ  data flow, khĂ´ng chá»©a háº¡ táº§ng.
 - [ ] Route, layout, guard vĂ  navigation Ä‘Ă£ Ä‘Æ°á»£c cáº­p nháº­t náº¿u cáº§n.
 - [ ] Loading, empty, error vĂ  permission Ä‘Ă£ Ä‘Æ°á»£c xá»­ lĂ½.
