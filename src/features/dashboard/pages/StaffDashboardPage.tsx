@@ -1,5 +1,9 @@
 import { CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
-import { Card, Col, Row, Space, Table, Tag, Typography } from 'antd';
+import { Card, Col, Row, Space, Tag, Typography } from 'antd';
+
+import { DataTable } from '@/shared/components/DataTable';
+
+import { DashboardPage } from '../components/DashboardPage';
 
 const todayQueue = [
   { id: 'apt-1004', customer: 'Minh Anh', service: 'Chăm sóc da chuyên sâu', time: '09:30' },
@@ -9,13 +13,11 @@ const todayQueue = [
 
 export function StaffDashboardPage() {
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 md:px-8">
-      <Typography.Title level={2}>Staff dashboard</Typography.Title>
-      <Typography.Text className="text-slate-500">
-        Tổng quan ca hẹn, hàng chờ và trạng thái xử lý trong ngày.
-      </Typography.Text>
-
-      <Row gutter={[18, 18]} className="mt-6">
+    <DashboardPage
+      title="Lịch làm việc"
+      description="Tổng quan ca hẹn, hàng chờ và trạng thái xử lý trong ngày."
+    >
+      <Row gutter={[18, 18]}>
         <Col xs={24} md={8}>
           <Card>
             <Space>
@@ -57,21 +59,18 @@ export function StaffDashboardPage() {
         </Col>
       </Row>
 
-      <Card className="mt-6" title="Hàng chờ hôm nay">
-        <Table
-          rowKey="id"
-          dataSource={todayQueue}
-          pagination={false}
-          columns={[
-            { title: 'Mã lịch', dataIndex: 'id' },
-            { title: 'Khách hàng', dataIndex: 'customer' },
-            { title: 'Dịch vụ', dataIndex: 'service' },
-            { title: 'Giờ', dataIndex: 'time' },
-            { title: 'Trạng thái', render: () => <Tag color="green">ready</Tag> },
-          ]}
-          scroll={{ x: 720 }}
-        />
-      </Card>
-    </main>
+      <DataTable
+        rowKey="id"
+        dataSource={todayQueue}
+        title="Hàng chờ hôm nay"
+        columns={[
+          { title: 'Mã lịch', dataIndex: 'id' },
+          { title: 'Khách hàng', dataIndex: 'customer' },
+          { title: 'Dịch vụ', dataIndex: 'service' },
+          { title: 'Giờ', dataIndex: 'time' },
+          { title: 'Trạng thái', render: () => <Tag color="green">ready</Tag> },
+        ]}
+      />
+    </DashboardPage>
   );
 }

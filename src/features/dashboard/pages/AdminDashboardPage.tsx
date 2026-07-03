@@ -1,5 +1,9 @@
 import { BarChartOutlined, TeamOutlined, WalletOutlined } from '@ant-design/icons';
-import { Card, Col, Progress, Row, Space, Table, Typography } from 'antd';
+import { Card, Col, Progress, Row, Space, Typography } from 'antd';
+
+import { DataTable } from '@/shared/components/DataTable';
+
+import { DashboardPage } from '../components/DashboardPage';
 
 const serviceStats = [
   { key: 'srv-01', service: 'Tư vấn sức khỏe tổng quát', bookings: 132, revenue: '46.2M' },
@@ -9,13 +13,11 @@ const serviceStats = [
 
 export function AdminDashboardPage() {
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 md:px-8">
-      <Typography.Title level={2}>Admin dashboard</Typography.Title>
-      <Typography.Text className="text-slate-500">
-        Theo dõi vận hành, doanh thu mock và hiệu suất dịch vụ.
-      </Typography.Text>
-
-      <Row gutter={[18, 18]} className="mt-6">
+    <DashboardPage
+      title="Thống kê"
+      description="Theo dõi vận hành, doanh thu mock và hiệu suất dịch vụ."
+    >
+      <Row gutter={[18, 18]}>
         <Col xs={24} md={8}>
           <Card>
             <Space>
@@ -55,19 +57,16 @@ export function AdminDashboardPage() {
         </Col>
       </Row>
 
-      <Card className="mt-6" title="Hiệu suất dịch vụ">
-        <Table
-          rowKey="key"
-          dataSource={serviceStats}
-          pagination={false}
-          columns={[
-            { title: 'Dịch vụ', dataIndex: 'service' },
-            { title: 'Lượt đặt', dataIndex: 'bookings' },
-            { title: 'Doanh thu', dataIndex: 'revenue' },
-          ]}
-          scroll={{ x: 720 }}
-        />
-      </Card>
-    </main>
+      <DataTable
+        rowKey="key"
+        dataSource={serviceStats}
+        title="Hiệu suất dịch vụ"
+        columns={[
+          { title: 'Dịch vụ', dataIndex: 'service' },
+          { title: 'Lượt đặt', dataIndex: 'bookings' },
+          { title: 'Doanh thu', dataIndex: 'revenue' },
+        ]}
+      />
+    </DashboardPage>
   );
 }
