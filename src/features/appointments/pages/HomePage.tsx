@@ -27,6 +27,7 @@ import { useOutletContext } from 'react-router-dom';
 
 import { useAppSelector } from '@/app/redux/hooks';
 import heroImage from '@/assets/appointment-hero.png';
+import { APP_BRAND } from '@/shared/constants/brand';
 
 import { appointmentApi } from '../api/appointment-api';
 import { ServiceCard } from '../components/ServiceCard';
@@ -103,14 +104,14 @@ export function HomePage() {
             <div className="flex min-h-[520px] flex-col justify-center">
               <Space className="mb-4 rounded-full bg-white/85 px-4 py-2 text-sage shadow-sm">
                 <CheckCircleFilled />
-                <span className="font-semibold">Đặt lịch nhanh, rõ chuyên viên, rõ khung giờ</span>
+                <span className="font-semibold">Đặt lịch nhanh, rõ dịch vụ, rõ khung giờ</span>
               </Space>
               <Typography.Title className="hero-title !mb-5 !text-white">
-                Appointment booking cho dịch vụ chăm sóc hiện đại
+                {APP_BRAND.name} cho những lịch hẹn chăm sóc nhẹ nhàng hơn
               </Typography.Title>
               <Typography.Paragraph className="max-w-2xl !text-lg !leading-8 !text-white/90">
-                Chọn dịch vụ, chuyên viên và khung giờ phù hợp trong một luồng gọn gàng.
-                Hiện frontend dùng mock data để sẵn sàng nối API thật.
+                Chọn dịch vụ, chuyên viên và khung giờ phù hợp trong một trải nghiệm rõ ràng,
+                ấm áp và đủ tin cậy cho các nhu cầu chăm sóc tại nhà.
               </Typography.Paragraph>
 
               <div className="mt-8 grid max-w-2xl grid-cols-3 gap-3">
@@ -202,7 +203,7 @@ export function HomePage() {
               Dịch vụ nổi bật
             </Typography.Title>
             <Typography.Text className="text-slate-500">
-              Các lựa chọn mock theo đúng flow booking, có thể thay bằng API khi backend sẵn sàng.
+              Gợi ý những dịch vụ được khách hàng lựa chọn nhiều trong tuần.
             </Typography.Text>
           </div>
           {selectedService ? (

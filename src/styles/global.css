@@ -12,7 +12,7 @@
 body {
   margin: 0;
   color: #17223b;
-  background: #f6f4ee;
+  background: #f7f4ee;
 }
 
 a {
@@ -28,8 +28,8 @@ a {
 .hero-overlay {
   min-height: calc(100vh - 72px);
   background:
-    linear-gradient(90deg, rgba(18, 33, 55, 0.78) 0%, rgba(18, 33, 55, 0.58) 42%, rgba(18, 33, 55, 0.16) 100%),
-    linear-gradient(180deg, rgba(15, 23, 42, 0.15) 0%, rgba(246, 244, 238, 0.92) 100%);
+    linear-gradient(90deg, rgba(20, 36, 56, 0.84) 0%, rgba(30, 57, 75, 0.58) 44%, rgba(30, 57, 75, 0.18) 100%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(247, 244, 238, 0.94) 100%);
 }
 
 .hero-title {
@@ -41,6 +41,7 @@ a {
 
 .booking-panel {
   border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 24px 70px rgba(18, 33, 55, 0.18);
 }
 
 .metric-tile {
@@ -68,6 +69,7 @@ a {
   display: flex;
   min-height: 292px;
   border: 1px solid #e7e2d8;
+  box-shadow: 0 10px 30px rgba(28, 45, 73, 0.06);
 }
 
 .service-card .ant-card-body {
@@ -112,6 +114,74 @@ a {
   font-size: 26px;
 }
 
+.dashboard-sider {
+  overflow: hidden;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #18372f 0%, #14283d 100%) !important;
+  box-shadow: 18px 0 48px rgba(15, 23, 42, 0.12);
+}
+
+.dashboard-menu.ant-menu-dark {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.dashboard-menu .ant-menu-item,
+.dashboard-menu .ant-menu-submenu-title {
+  height: 42px;
+  margin: 4px 0;
+  border-radius: 8px;
+}
+
+.dashboard-menu.ant-menu-dark .ant-menu-item-selected {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.dashboard-menu.ant-menu-dark .ant-menu-item:hover,
+.dashboard-menu.ant-menu-dark .ant-menu-submenu-title:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.dashboard-sidebar-action {
+  justify-content: flex-start;
+  height: 42px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.dashboard-sidebar-action:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.ant-layout-sider-collapsed .dashboard-sidebar-action {
+  justify-content: center;
+}
+
+.ant-layout-sider-collapsed .dashboard-sidebar-action .ant-btn-icon {
+  margin-inline-end: 0;
+}
+
+.dashboard-sidebar-action-danger {
+  color: #ffc0b8 !important;
+}
+
+.ant-card {
+  border-color: rgba(226, 232, 240, 0.86);
+  box-shadow: 0 12px 34px rgba(28, 45, 73, 0.06);
+}
+
+.ant-table-wrapper .ant-table-thead > tr > th {
+  color: #475569;
+  background: #f8fafc;
+  font-weight: 700;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr > td {
+  border-bottom-color: #eef2f7;
+}
+
 @media (max-width: 767px) {
   .hero-section,
   .hero-overlay {
@@ -120,7 +190,7 @@ a {
 
   .hero-overlay {
     background:
-      linear-gradient(180deg, rgba(18, 33, 55, 0.84) 0%, rgba(18, 33, 55, 0.58) 56%, rgba(246, 244, 238, 0.96) 100%);
+      linear-gradient(180deg, rgba(18, 33, 55, 0.86) 0%, rgba(18, 33, 55, 0.58) 56%, rgba(247, 244, 238, 0.96) 100%);
   }
 
   .hero-title {

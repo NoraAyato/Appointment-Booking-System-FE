@@ -8,7 +8,7 @@ export default {
       },
       colors: {
         ink: '#17223b',
-        sage: '#4f8f7b',
+        sage: '#214f45',
         coral: '#de7d62',
         wheat: '#f4c46b',
       },

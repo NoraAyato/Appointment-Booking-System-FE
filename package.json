@@ -1,5 +1,5 @@
 {
-  "name": "yoedu-appointment-booking-fe",
+  "name": "homefeel-appointment-booking-fe",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@reduxjs/toolkit": "^2.5.0",
     "antd": "^5.23.4",
     "axios": "^1.7.9",

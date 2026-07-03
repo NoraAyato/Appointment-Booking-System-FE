@@ -74,7 +74,7 @@ export const mockAppointments: Appointment[] = [
     specialistName: 'Phạm Ngọc Mai',
     scheduledAt: '2026-06-28T09:30:00',
     status: 'confirmed',
-    location: 'YoEdu Wellness - Quận 3',
+    location: 'HomeFeel Wellness - Quận 3',
     price: 520000,
   },
   {
@@ -92,7 +92,7 @@ export const mockAppointments: Appointment[] = [
     specialistName: 'Trần Bảo Nam',
     scheduledAt: '2026-06-05T16:30:00',
     status: 'completed',
-    location: 'YoEdu Clinic - Quận 1',
+    location: 'HomeFeel Studio - Quận 1',
     price: 650000,
   },
 ];

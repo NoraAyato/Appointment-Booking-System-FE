@@ -2,12 +2,13 @@ import type { ThemeConfig } from 'antd';
 
 export const appTheme: ThemeConfig = {
   token: {
-    colorPrimary: '#2f7d67',
-    colorInfo: '#2f7d67',
-    colorSuccess: '#438d69',
-    colorWarning: '#d99530',
+    colorPrimary: '#214f45',
+    colorInfo: '#214f45',
+    colorSuccess: '#3f8a65',
+    colorWarning: '#c6862f',
     colorError: '#c94c4c',
     colorTextBase: '#17223b',
+    colorBgLayout: '#f7f4ee',
     borderRadius: 8,
     fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
   },
@@ -19,6 +20,7 @@ export const appTheme: ThemeConfig = {
     },
     Card: {
       borderRadiusLG: 8,
+      headerFontSize: 16,
     },
     Input: {
       borderRadius: 8,
