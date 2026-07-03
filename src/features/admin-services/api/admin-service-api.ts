@@ -9,6 +9,7 @@ import type {
   AdminService,
   AdminServiceBasePayload,
   AdminServiceFilterParams,
+  AdminServiceOption,
   CreateAdminServicePayload,
   PublicCategoryOption,
   UpdateAdminServicePayload,
@@ -87,6 +88,14 @@ export const adminServiceRoleAdminApi = {
           'Content-Type': 'multipart/form-data',
         },
       },
+    );
+
+    return response.data;
+  },
+
+  getServiceOptions: async () => {
+    const response = await axiosClient.get<ApiResponse<AdminServiceOption[]>>(
+      `${ADMIN_SERVICE_API_URL_PREFIX}/service-options`,
     );
 
     return response.data;

@@ -4,8 +4,13 @@ import { AppRootLayout } from '@/app/layouts/AppRootLayout';
 import { MainLayout } from '@/app/layouts/MainLayout';
 import { AppointmentHistoryPage } from '@/features/appointments/pages/AppointmentHistoryPage';
 import { HomePage } from '@/features/appointments/pages/HomePage';
+import { AdminBlockedSlotsPage } from '@/features/admin-blocked-slots/pages/AdminBlockedSlotsPage';
 import { AdminCategoriesPage } from '@/features/admin-categories/pages/AdminCategoriesPage';
+import { AdminPromotionsPage } from '@/features/admin-promotions/pages/AdminPromotionsPage';
+import { AdminReviewsPage } from '@/features/admin-reviews/pages/AdminReviewsPage';
 import { AdminServicesPage } from '@/features/admin-services/pages/AdminServicesPage';
+import { AdminStaffServicesPage } from '@/features/admin-staff-services/pages/AdminStaffServicesPage';
+import { AdminStaffShiftsPage } from '@/features/admin-staff-shifts/pages/AdminStaffShiftsPage';
 import { AdminUsersPage } from '@/features/admin-users/pages/AdminUsersPage';
 import { DashboardLayout } from '@/features/dashboard/components/DashboardLayout';
 import {
@@ -13,7 +18,6 @@ import {
   staffDashboardNavItems,
 } from '@/features/dashboard/constants/dashboard-nav';
 import { AdminDashboardPage } from '@/features/dashboard/pages/AdminDashboardPage';
-import { AdminManagementPage } from '@/features/dashboard/pages/AdminManagementPage';
 import { StaffDashboardPage } from '@/features/dashboard/pages/StaffDashboardPage';
 import { ProfilePage } from '@/features/profile/pages/ProfilePage';
 import { PromotionsPage } from '@/features/promotions/pages/PromotionsPage';
@@ -96,23 +100,11 @@ export const router = createBrowserRouter([
           },
           {
             path: 'promotions',
-            element: (
-              <AdminManagementPage
-                title="Quản lý khuyến mãi"
-                description="Theo dõi mã ưu đãi, thời hạn và trạng thái áp dụng."
-                sampleName="Danh sách khuyến mãi mock"
-              />
-            ),
+            element: <AdminPromotionsPage />,
           },
           {
             path: 'reviews',
-            element: (
-              <AdminManagementPage
-                title="Quản lý đánh giá"
-                description="Kiểm duyệt đánh giá dịch vụ và phản hồi từ khách hàng."
-                sampleName="Danh sách đánh giá mock"
-              />
-            ),
+            element: <AdminReviewsPage />,
           },
           {
             path: 'services',
@@ -123,14 +115,20 @@ export const router = createBrowserRouter([
             element: <AdminCategoriesPage />,
           },
           {
+            path: 'schedule-locks',
+            element: <AdminBlockedSlotsPage />,
+          },
+          {
+            path: 'work-shifts',
+            element: <AdminStaffShiftsPage />,
+          },
+          {
+            path: 'staff-assignments',
+            element: <AdminStaffServicesPage />,
+          },
+          {
             path: 'slot-locks',
-            element: (
-              <AdminManagementPage
-                title="Quản lý khóa slot"
-                description="Quản lý các khoảng thời gian nhân viên không nhận lịch."
-                sampleName="Danh sách slot bị khóa mock"
-              />
-            ),
+            element: <AdminBlockedSlotsPage />,
           },
         ],
       },

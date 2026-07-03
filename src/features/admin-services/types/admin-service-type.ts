@@ -30,6 +30,11 @@ export interface PublicCategoryOption {
   name: string;
 }
 
+export interface AdminServiceOption {
+  id: string;
+  name: string;
+}
+
 export interface AdminServiceBasePayload {
   description: string;
   durationMinutes: number;

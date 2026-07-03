@@ -26,6 +26,11 @@ export interface AdminUserStats {
   inactiveUsers: number;
 }
 
+export interface AdminStaffOption {
+  id: string;
+  name: string;
+}
+
 export interface UpdateUserInfoPayload {
   role: AdminUserRole;
   status: AdminUserStatusFilter;

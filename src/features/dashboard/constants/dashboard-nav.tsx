@@ -1,12 +1,15 @@
 import {
   AppstoreOutlined,
+  ApartmentOutlined,
   BarChartOutlined,
   CalendarOutlined,
   GiftOutlined,
   LockOutlined,
   MessageOutlined,
   ReadOutlined,
+  ScheduleOutlined,
   TeamOutlined,
+  UserSwitchOutlined,
 } from '@ant-design/icons';
 
 import type { DashboardNavItem } from '../types/dashboard-type';
@@ -56,10 +59,29 @@ export const adminDashboardNavItems: DashboardNavItem[] = [
     ],
   },
   {
-    key: 'slot-locks',
-    label: 'Quản lý khóa slot',
-    path: '/admin/dashboard/slot-locks',
-    icon: <LockOutlined />,
+    key: 'staff-management',
+    label: 'Quản lý nhân viên',
+    icon: <UserSwitchOutlined />,
+    children: [
+      {
+        key: 'schedule-locks',
+        label: 'Khóa lịch',
+        path: '/admin/dashboard/schedule-locks',
+        icon: <LockOutlined />,
+      },
+      {
+        key: 'work-shifts',
+        label: 'Ca làm việc',
+        path: '/admin/dashboard/work-shifts',
+        icon: <ScheduleOutlined />,
+      },
+      {
+        key: 'staff-assignments',
+        label: 'Phân công',
+        path: '/admin/dashboard/staff-assignments',
+        icon: <ApartmentOutlined />,
+      },
+    ],
   },
 ];
 

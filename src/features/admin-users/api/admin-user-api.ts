@@ -4,6 +4,7 @@ import type { ApiResponse, PaginatedData } from '@/shared/types/api-type';
 import type {
   AdminUser,
   AdminUserFilterParams,
+  AdminStaffOption,
   AdminUserStats,
   UpdateUserInfoPayload,
 } from '../types/admin-user-type';
@@ -21,6 +22,14 @@ export const adminUserRoleAdminApi = {
 
   getStats: async () => {
     const response = await axiosClient.get<ApiResponse<AdminUserStats>>(`${API_URL_PREFIX}/stats`);
+
+    return response.data;
+  },
+
+  getStaffOptions: async () => {
+    const response = await axiosClient.get<ApiResponse<AdminStaffOption[]>>(
+      `${API_URL_PREFIX}/staff-options`,
+    );
 
     return response.data;
   },
