@@ -12,6 +12,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/redux/hooks';
 import { logout } from '@/features/auth/store/auth-thunk';
 import { APP_BRAND } from '@/shared/constants/brand';
+import { getAssetUrl } from '@/shared/utils/asset-url';
 import { getAvatarInitial } from '@/shared/utils/avatar';
 
 import type { DashboardNavItem } from '../types/dashboard-type';
@@ -41,7 +42,8 @@ export function DashboardLayout({ navItems, title, subtitle }: DashboardLayoutPr
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.auth.user);
+  const user = useAppSelector((state) => state.users.currentUser);
+  const avatarUrl = getAssetUrl(user?.avatarUrl);
 
   const menuItems = useMemo<MenuProps['items']>(
     () =>
@@ -131,7 +133,7 @@ export function DashboardLayout({ navItems, title, subtitle }: DashboardLayoutPr
           </Link>
 
           <div className="m-4 flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.08] px-3 py-3">
-            <Avatar src={user?.avatarUrl || undefined} size={collapsed ? 36 : 42}>
+            <Avatar src={avatarUrl} size={collapsed ? 36 : 42}>
               {getAvatarInitial(user?.fullName, user?.email)}
             </Avatar>
             {!collapsed ? (

@@ -82,6 +82,7 @@ axiosClient.interceptors.response.use(
       return axiosClient(originalRequest);
     } catch (refreshError) {
       flushRequestQueue(refreshError);
+      window.dispatchEvent(new Event('auth:expired'));
 
       return Promise.reject(refreshError);
     } finally {

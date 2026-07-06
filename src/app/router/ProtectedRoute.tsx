@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
-  const user = useAppSelector((state) => state.auth.user);
+  const user = useAppSelector((state) => state.users.currentUser);
 
   if (!user) {
     return <Navigate to="/" replace />;

@@ -48,7 +48,7 @@ export function HomePage() {
   const [specialists, setSpecialists] = useState<Specialist[]>([]);
   const [selectedServiceId, setSelectedServiceId] = useState<string>('srv-01');
   const [submitting, setSubmitting] = useState(false);
-  const user = useAppSelector((state) => state.auth.user);
+  const user = useAppSelector((state) => state.users.currentUser);
   const { openLogin } = useOutletContext<MainLayoutContext>();
 
   useEffect(() => {

@@ -11,5 +11,5 @@ export const toUser = (data: CurrentUserData): User => ({
   lastName: data.lastName,
   status: data.status,
   gender: data.gender,
-  receiveEmail: data.receiveEmail,
+  receiveEmail: data.isReceiveEmail ?? data.receiveEmail ?? false,
 });

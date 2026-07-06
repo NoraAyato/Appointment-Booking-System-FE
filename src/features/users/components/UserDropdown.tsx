@@ -3,6 +3,7 @@ import { Avatar, Button, Dropdown, Space } from 'antd';
 import type { MenuProps } from 'antd';
 import { Link } from 'react-router-dom';
 
+import { getAssetUrl } from '@/shared/utils/asset-url';
 import { getAvatarInitial } from '@/shared/utils/avatar';
 
 import type { User } from '../types/user-type';
@@ -15,6 +16,7 @@ interface UserDropdownProps {
 
 export function UserDropdown({ user, onLogout }: UserDropdownProps) {
   const dashboardPath = getDashboardPathByRole(user.role);
+  const avatarUrl = getAssetUrl(user.avatarUrl);
 
   const userMenuItems: MenuProps['items'] = [
     ...(dashboardPath
@@ -57,7 +59,7 @@ export function UserDropdown({ user, onLogout }: UserDropdownProps) {
     <Dropdown menu={{ items: userMenuItems }} trigger={['hover']} placement="bottomLeft">
       <Button className="h-11 px-2" type="text">
         <Space size={10}>
-          <Avatar src={user.avatarUrl || undefined} size={34}>
+          <Avatar src={avatarUrl} size={34}>
             {getAvatarInitial(user.fullName, user.email)}
           </Avatar>
           <span className="hidden max-w-[128px] truncate font-semibold text-ink sm:inline">

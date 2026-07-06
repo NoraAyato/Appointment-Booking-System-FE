@@ -104,6 +104,28 @@ a {
   background: #eef3ff;
 }
 
+.admin-user-stat-card {
+  height: 100%;
+}
+
+.admin-user-stat-card .ant-card-body {
+  display: flex;
+  min-height: 130px;
+  align-items: center;
+}
+
+.admin-user-stat {
+  width: 100%;
+}
+
+.profile-tabs-card .ant-card-body {
+  min-height: 560px;
+}
+
+.profile-tabs-card .ant-tabs-nav {
+  margin-bottom: 24px;
+}
+
 .promo-icon {
   display: grid;
   width: 56px;

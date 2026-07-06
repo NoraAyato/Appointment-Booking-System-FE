@@ -252,12 +252,12 @@ export function AdminUsersPage() {
       >
         <Row gutter={[16, 16]}>
           <Col xs={24} md={8}>
-            <Card loading={statsLoading}>
-              <Space>
+            <Card loading={statsLoading} className="admin-user-stat-card">
+              <Space align="center" size={12} className="admin-user-stat">
                 <TeamOutlined className="dashboard-icon" />
                 <div>
                   <Typography.Text className="text-slate-500">Tổng người dùng</Typography.Text>
-                  <Typography.Title level={3} className="!mb-0">
+                  <Typography.Title level={3} className="!mb-0 !mt-1">
                     {stats.totalUsers}
                   </Typography.Title>
                 </div>
@@ -265,12 +265,12 @@ export function AdminUsersPage() {
             </Card>
           </Col>
           <Col xs={24} md={8}>
-            <Card loading={statsLoading}>
-              <Space>
+            <Card loading={statsLoading} className="admin-user-stat-card">
+              <Space align="center" size={12} className="admin-user-stat">
                 <UserSwitchOutlined className="dashboard-icon blue" />
                 <div>
                   <Typography.Text className="text-slate-500">Đang hoạt động</Typography.Text>
-                  <Typography.Title level={3} className="!mb-0">
+                  <Typography.Title level={3} className="!mb-0 !mt-1">
                     {stats.activeUsers}
                   </Typography.Title>
                 </div>
@@ -278,12 +278,12 @@ export function AdminUsersPage() {
             </Card>
           </Col>
           <Col xs={24} md={8}>
-            <Card loading={statsLoading}>
-              <Space>
+            <Card loading={statsLoading} className="admin-user-stat-card">
+              <Space align="center" size={12} className="admin-user-stat">
                 <UserSwitchOutlined className="dashboard-icon amber" />
                 <div>
                   <Typography.Text className="text-slate-500">Ngừng hoạt động</Typography.Text>
-                  <Typography.Title level={3} className="!mb-0">
+                  <Typography.Title level={3} className="!mb-0 !mt-1">
                     {stats.inactiveUsers}
                   </Typography.Title>
                 </div>

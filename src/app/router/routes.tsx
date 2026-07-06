@@ -2,6 +2,8 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import { AppRootLayout } from '@/app/layouts/AppRootLayout';
 import { MainLayout } from '@/app/layouts/MainLayout';
+import { GoogleCallbackPage } from '@/features/auth/pages/GoogleCallbackPage';
+import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage';
 import { AppointmentHistoryPage } from '@/features/appointments/pages/AppointmentHistoryPage';
 import { HomePage } from '@/features/appointments/pages/HomePage';
 import { AdminBlockedSlotsPage } from '@/features/admin-blocked-slots/pages/AdminBlockedSlotsPage';
@@ -31,6 +33,14 @@ export const router = createBrowserRouter([
     errorElement: <AppRouteError />,
     element: <AppRootLayout />,
     children: [
+      {
+        path: 'auth/reset-password',
+        element: <ResetPasswordPage />,
+      },
+      {
+        path: 'auth/google-callback',
+        element: <GoogleCallbackPage />,
+      },
       {
         element: <MainLayout />,
         children: [

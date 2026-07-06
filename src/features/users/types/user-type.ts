@@ -25,5 +25,13 @@ export interface CurrentUserData {
   status: string;
   role: UserRole;
   gender: boolean;
-  receiveEmail: boolean;
+  isReceiveEmail?: boolean;
+  receiveEmail?: boolean;
+}
+
+export interface UpdateUserProfilePayload {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  gender: boolean;
 }
