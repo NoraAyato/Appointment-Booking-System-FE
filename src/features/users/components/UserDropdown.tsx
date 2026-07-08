@@ -26,12 +26,15 @@ export function UserDropdown({ user, onLogout }: UserDropdownProps) {
             icon: <SettingOutlined />,
             label: <Link to={dashboardPath}>Dashboard</Link>,
           },
+          {
+            type: 'divider' as const,
+          },
         ]
       : []),
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: <Link to="/profile">Profile user</Link>,
+      label: <Link to="/profile">Hồ sơ</Link>,
     },
     {
       key: 'history',

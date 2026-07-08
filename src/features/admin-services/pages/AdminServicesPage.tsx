@@ -55,11 +55,15 @@ const currencyFormatter = new Intl.NumberFormat('vi-VN', {
   style: 'currency',
 });
 
-const getMainImage = (service: AdminService) =>
-  getAssetUrl(
-    service.serviceImageList.find((image) => image.isMainImage)?.picture ??
-      service.serviceImageList[0]?.picture,
+const getServiceImages = (service: AdminService) => service.serviceImageList ?? [];
+
+const getMainImage = (service: AdminService) => {
+  const serviceImages = getServiceImages(service);
+
+  return getAssetUrl(
+    serviceImages.find((image) => image.isMainImage)?.picture ?? serviceImages[0]?.picture,
   );
+};
 
 const toUploadFiles = (files?: UploadFile[]) =>
   files
@@ -555,9 +559,9 @@ export function AdminServicesPage() {
               </Descriptions.Item>
               <Descriptions.Item label="Mô tả">{selectedService.description}</Descriptions.Item>
             </Descriptions>
-            {selectedService.serviceImageList.length ? (
+            {getServiceImages(selectedService).length ? (
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                {selectedService.serviceImageList.map((image, index) => (
+                {getServiceImages(selectedService).map((image, index) => (
                   <div key={`${image.picture}-${index}`} className="relative">
                     <Image
                       className="aspect-square rounded object-cover"

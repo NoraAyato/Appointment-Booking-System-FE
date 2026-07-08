@@ -2,10 +2,10 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import { AppRootLayout } from '@/app/layouts/AppRootLayout';
 import { MainLayout } from '@/app/layouts/MainLayout';
+import { AboutPage } from '@/features/about/pages/AboutPage';
 import { GoogleCallbackPage } from '@/features/auth/pages/GoogleCallbackPage';
 import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage';
 import { AppointmentHistoryPage } from '@/features/appointments/pages/AppointmentHistoryPage';
-import { HomePage } from '@/features/appointments/pages/HomePage';
 import { AdminBlockedSlotsPage } from '@/features/admin-blocked-slots/pages/AdminBlockedSlotsPage';
 import { AdminCategoriesPage } from '@/features/admin-categories/pages/AdminCategoriesPage';
 import { AdminPromotionsPage } from '@/features/admin-promotions/pages/AdminPromotionsPage';
@@ -21,8 +21,10 @@ import {
 } from '@/features/dashboard/constants/dashboard-nav';
 import { AdminDashboardPage } from '@/features/dashboard/pages/AdminDashboardPage';
 import { StaffDashboardPage } from '@/features/dashboard/pages/StaffDashboardPage';
+import { HomePage } from '@/features/home/pages/HomePage';
 import { ProfilePage } from '@/features/profile/pages/ProfilePage';
 import { PromotionsPage } from '@/features/promotions/pages/PromotionsPage';
+import { ServicesPage } from '@/features/public-services/pages/ServicesPage';
 import { AppRouteError } from '@/shared/components/AppRouteError';
 
 import { ProtectedRoute } from './ProtectedRoute';
@@ -51,6 +53,14 @@ export const router = createBrowserRouter([
           {
             path: 'promotions',
             element: <PromotionsPage />,
+          },
+          {
+            path: 'services',
+            element: <ServicesPage />,
+          },
+          {
+            path: 'about',
+            element: <AboutPage />,
           },
           {
             path: 'profile',

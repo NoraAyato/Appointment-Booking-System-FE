@@ -16,6 +16,8 @@ export function toTablePagination({
   size,
   total,
 }: AppPaginationProps): TablePaginationConfig {
+  const tableShowTotal = showTotal === false ? undefined : showTotal;
+
   return {
     current,
     disabled,
@@ -25,7 +27,7 @@ export function toTablePagination({
     pageSizeOptions,
     showQuickJumper,
     showSizeChanger,
-    showTotal,
+    showTotal: tableShowTotal,
     simple,
     size,
     total,

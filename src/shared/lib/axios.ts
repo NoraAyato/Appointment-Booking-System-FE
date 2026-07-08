@@ -36,6 +36,8 @@ const isAuthEndpoint = (url?: string) => {
   return AUTH_ENDPOINTS.some((endpoint) => url.includes(endpoint));
 };
 
+const isRefreshableAuthError = (status?: number) => status === 401;
+
 const flushRequestQueue = (error?: unknown) => {
   requestQueue.forEach(({ resolve, reject }) => {
     if (error) {
@@ -55,7 +57,7 @@ axiosClient.interceptors.response.use(
 
     if (
       !originalRequest ||
-      error.response?.status !== 401 ||
+      !isRefreshableAuthError(error.response?.status) ||
       originalRequest._retry ||
       isAuthEndpoint(originalRequest.url)
     ) {

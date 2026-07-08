@@ -12,7 +12,7 @@ export interface AppPaginationProps {
   pageSizeOptions?: PaginationProps['pageSizeOptions'];
   showQuickJumper?: boolean;
   showSizeChanger?: boolean;
-  showTotal?: PaginationProps['showTotal'];
+  showTotal?: PaginationProps['showTotal'] | false;
   simple?: PaginationProps['simple'];
   size?: PaginationProps['size'];
   total: number;
@@ -40,6 +40,8 @@ export function AppPagination({
   size,
   total,
 }: AppPaginationProps) {
+  const paginationShowTotal = showTotal === false ? undefined : showTotal;
+
   return (
     <div className={`flex ${alignClassName[align]} ${className ?? ''}`}>
       <Pagination
@@ -51,7 +53,7 @@ export function AppPagination({
         pageSizeOptions={pageSizeOptions}
         showQuickJumper={showQuickJumper}
         showSizeChanger={showSizeChanger}
-        showTotal={showTotal}
+        showTotal={paginationShowTotal}
         simple={simple}
         size={size}
         total={total}

@@ -17,7 +17,7 @@ export interface AdminService {
   price: number;
   status: string;
   categoryName: string;
-  serviceImageList: AdminServiceImage[];
+  serviceImageList: AdminServiceImage[] | null;
 }
 
 export interface AdminServiceFilterParams extends FilterParams {

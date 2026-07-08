@@ -1,16 +1,5 @@
 export type AppointmentStatus = 'confirmed' | 'pending' | 'completed' | 'cancelled';
 
-export interface Service {
-  id: string;
-  name: string;
-  category: string;
-  durationMinutes: number;
-  price: number;
-  rating: number;
-  description: string;
-  accentColor: string;
-}
-
 export interface Specialist {
   id: string;
   fullName: string;
