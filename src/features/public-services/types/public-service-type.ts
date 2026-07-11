@@ -20,6 +20,7 @@ export interface PublicServiceCardModel {
   description: string;
   accentColor: string;
   imageUrl?: string;
+  imageUrls: string[];
   location: string;
 }
 
@@ -35,4 +36,47 @@ export interface PublicServiceFilterParams {
 export interface PublicCategoryOption {
   id: string;
   name: string;
+}
+
+export interface PublicServiceDetailRouteState {
+  date?: string;
+  service?: PublicServiceCardModel;
+  time?: string;
+}
+
+export interface PublicServiceStaffItem {
+  id: string;
+  staffName: string;
+  staffAvatar: string | null;
+  rating: number;
+  completedServices: number;
+  specialties: string[];
+}
+
+export interface PublicServiceStaffModel {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  rating: number;
+  completedServices: number;
+  specialties: string[];
+}
+
+export interface PublicServiceStaffFilterParams {
+  date: string;
+  serviceId: string;
+  time: string;
+}
+
+export interface PublicServiceAvailableTimeSlotItem {
+  startTime: string;
+  endTime: string;
+  availableStaffCount: number;
+}
+
+export type PublicServiceAvailableTimeSlotModel = PublicServiceAvailableTimeSlotItem;
+
+export interface PublicServiceAvailableTimeSlotFilterParams {
+  date: string;
+  serviceId: string;
 }

@@ -1,9 +1,4 @@
-import {
-  CalendarOutlined,
-  ClockCircleOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { CalendarOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import {
   Button,
   Card,
@@ -14,13 +9,13 @@ import {
   Input,
   Row,
   Space,
-  Statistic,
   Typography,
   notification,
 } from 'antd';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { AppPagination } from '@/shared/components/AppPagination';
 import { AppSelect } from '@/shared/components/AppSelect';
@@ -29,27 +24,24 @@ import { getApiErrorMessage } from '@/shared/utils/api-error';
 
 import { publicServiceApi } from '../api/public-service-api';
 import { ServiceCard } from '../components/ServiceCard';
-import {
-  DEFAULT_PUBLIC_SERVICE_PAGE_SIZE,
-  publicServiceTimeSlots,
-} from '../constants/public-service-options';
+import { DEFAULT_PUBLIC_SERVICE_PAGE_SIZE } from '../constants/public-service-options';
 import type { PublicServiceCardModel } from '../types/public-service-type';
+import { isDateBeforeToday } from '../utils/public-service-time';
 
 interface ServiceFilterValues {
   categoryId?: string;
-  date?: Dayjs;
+  date?: Dayjs | null;
   keyword?: string;
-  time?: string;
 }
 
 export function ServicesPage() {
   const [form] = Form.useForm<ServiceFilterValues>();
+  const navigate = useNavigate();
   const [toast, toastContextHolder] = notification.useNotification();
   const [services, setServices] = useState<PublicServiceCardModel[]>([]);
   const [total, setTotal] = useState(0);
   const [filters, setFilters] = useState<ServiceFilterValues>({
-    date: dayjs().add(1, 'day'),
-    time: publicServiceTimeSlots[1],
+    date: dayjs(),
   });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PUBLIC_SERVICE_PAGE_SIZE);
@@ -99,7 +91,6 @@ export function ServicesPage() {
           keyWord: nextFilters.keyword?.trim() || undefined,
           limit: nextLimit,
           page: nextPage,
-          time: nextFilters.time,
         });
 
         if (!response.success) {
@@ -127,16 +118,6 @@ export function ServicesPage() {
     void fetchServices(filters, page, pageSize);
   }, [fetchServices, filters, page, pageSize]);
 
-  const averageRating = useMemo(() => {
-    if (!services.length) {
-      return 0;
-    }
-
-    const totalRating = services.reduce((sum, service) => sum + service.rating, 0);
-
-    return Number((totalRating / services.length).toFixed(1));
-  }, [services]);
-
   const handleFilter = (values: ServiceFilterValues) => {
     setFilters(values);
     setPage(1);
@@ -144,8 +125,7 @@ export function ServicesPage() {
 
   const handleReset = () => {
     const nextFilters = {
-      date: dayjs().add(1, 'day'),
-      time: publicServiceTimeSlots[1],
+      date: dayjs(),
     };
 
     form.setFieldsValue(nextFilters);
@@ -153,12 +133,21 @@ export function ServicesPage() {
     setPage(1);
   };
 
+  const handleViewDetail = (service: PublicServiceCardModel) => {
+    navigate(`/services/${service.id}`, {
+      state: {
+        date: filters.date?.format('YYYY-MM-DD'),
+        service,
+      },
+    });
+  };
+
   return (
     <main className="bg-[#f7f4ee]">
       {toastContextHolder}
 
       <section className="services-hero">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:px-8 lg:grid-cols-[1fr_420px] lg:py-16">
+        <div className="mx-auto max-w-7xl px-4 py-12 md:px-8 lg:py-16">
           <div className="flex flex-col justify-center">
             <Typography.Text className="mb-3 !font-semibold uppercase tracking-[0.18em] !text-sage">
               Dịch vụ HomeFeel
@@ -167,55 +156,38 @@ export function ServicesPage() {
               Chọn dịch vụ tại trung tâm phù hợp với lịch của bạn
             </Typography.Title>
             <Typography.Paragraph className="max-w-2xl !text-lg !leading-8 !text-slate-600">
-              Lọc theo ngày giờ mong muốn, xem đầy đủ thông tin dịch vụ của HomeFeel và chọn khung
+              Lọc theo ngày mong muốn, xem đầy đủ thông tin dịch vụ của HomeFeel và chọn trải nghiệm
               chăm sóc phù hợp tại trung tâm.
             </Typography.Paragraph>
           </div>
-
-          <Card className="self-end">
-            <div className="grid grid-cols-3 gap-3">
-              <Statistic title="Dịch vụ" value={total} />
-              <Statistic title="Đánh giá" value={averageRating} precision={1} />
-              <Statistic title="Khung giờ" value={publicServiceTimeSlots.length} />
-            </div>
-          </Card>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-10">
-        <Card className="mb-6">
+        <Card className="service-filter-card mb-6">
           <Form<ServiceFilterValues>
             form={form}
             layout="vertical"
             initialValues={filters}
             onFinish={handleFilter}
           >
-            <Row gutter={[16, 0]} align="bottom">
-              <Col xs={24} md={8} lg={7}>
+            <div className="service-filter-grid">
+              <div>
                 <Form.Item name="keyword" label="Tìm dịch vụ">
                   <Input allowClear prefix={<SearchOutlined />} placeholder="Tên hoặc mô tả" />
                 </Form.Item>
-              </Col>
-              <Col xs={24} sm={12} md={8} lg={5}>
+              </div>
+              <div>
                 <Form.Item name="date" label="Ngày">
                   <DatePicker
-                    className="w-full"
+                    className="service-filter-date-picker w-full"
                     format="DD/MM/YYYY"
                     suffixIcon={<CalendarOutlined />}
-                    disabledDate={(date) => date.isBefore(dayjs().startOf('day'))}
+                    disabledDate={isDateBeforeToday}
                   />
                 </Form.Item>
-              </Col>
-              <Col xs={24} sm={12} md={8} lg={4}>
-                <Form.Item name="time" label="Giờ">
-                  <AppSelect
-                    options={publicServiceTimeSlots.map((slot) => ({ label: slot, value: slot }))}
-                    placeholder="Chọn giờ"
-                    suffixIcon={<ClockCircleOutlined />}
-                  />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={12} md={8} lg={4}>
+              </div>
+              <div>
                 <Form.Item name="categoryId" label="Danh mục">
                   <AppSelect
                     allowClear
@@ -224,16 +196,16 @@ export function ServicesPage() {
                     placeholder="Tất cả"
                   />
                 </Form.Item>
-              </Col>
-              <Col xs={24} sm={12} md={8} lg={4}>
-                <Space className="mb-6 w-full" size={10}>
+              </div>
+              <div>
+                <Space className="service-filter-actions mb-6 w-full" size={10}>
                   <Button block type="primary" htmlType="submit" icon={<SearchOutlined />}>
                     Lọc
                   </Button>
                   <Button icon={<ReloadOutlined />} onClick={handleReset} />
                 </Space>
-              </Col>
-            </Row>
+              </div>
+            </div>
           </Form>
         </Card>
 
@@ -244,7 +216,6 @@ export function ServicesPage() {
             </Typography.Title>
             <Typography.Text className="!text-slate-500">
               {filters.date ? `Ngày ${filters.date.format('DD/MM/YYYY')}` : 'Chưa chọn ngày'}
-              {filters.time ? `, lúc ${filters.time}` : ''}
             </Typography.Text>
           </div>
           <Typography.Text className="!text-slate-500">
@@ -264,7 +235,11 @@ export function ServicesPage() {
           <Row gutter={[20, 20]}>
             {services.map((service) => (
               <Col key={service.id} xs={24} md={12} xl={8}>
-                <ServiceCard service={service} actionLabel="Xem lịch trống" />
+                <ServiceCard
+                  service={service}
+                  actionLabel="Xem chi tiết"
+                  onSelect={() => handleViewDetail(service)}
+                />
               </Col>
             ))}
           </Row>

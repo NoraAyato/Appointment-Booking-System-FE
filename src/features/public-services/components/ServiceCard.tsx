@@ -5,6 +5,7 @@ import {
   StarFilled,
 } from '@ant-design/icons';
 import { Button, Card, Tag, Typography } from 'antd';
+import { useNavigate } from 'react-router-dom';
 
 import fallbackServiceImage from '@/assets/appointment-hero.png';
 
@@ -25,13 +26,28 @@ export function ServiceCard({
   selected,
   service,
 }: ServiceCardProps) {
+  const navigate = useNavigate();
+
+  const handleSelect = () => {
+    if (onSelect) {
+      onSelect(service.id);
+      return;
+    }
+
+    navigate(`/services/${service.id}`, {
+      state: {
+        service,
+      },
+    });
+  };
+
   return (
     <Card
       hoverable
       className={`service-card h-full overflow-hidden ${compact ? 'service-card-compact' : ''} ${
         selected ? 'service-card-selected' : ''
       }`}
-      onClick={() => onSelect?.(service.id)}
+      onClick={handleSelect}
     >
       <div className="service-card-image">
         <img alt={service.name} src={service.imageUrl || fallbackServiceImage} />

@@ -24,6 +24,7 @@ import { StaffDashboardPage } from '@/features/dashboard/pages/StaffDashboardPag
 import { HomePage } from '@/features/home/pages/HomePage';
 import { ProfilePage } from '@/features/profile/pages/ProfilePage';
 import { PromotionsPage } from '@/features/promotions/pages/PromotionsPage';
+import { ServiceDetailPage } from '@/features/public-services/pages/ServiceDetailPage';
 import { ServicesPage } from '@/features/public-services/pages/ServicesPage';
 import { AppRouteError } from '@/shared/components/AppRouteError';
 
@@ -57,6 +58,10 @@ export const router = createBrowserRouter([
           {
             path: 'services',
             element: <ServicesPage />,
+          },
+          {
+            path: 'services/:serviceId',
+            element: <ServiceDetailPage />,
           },
           {
             path: 'about',
