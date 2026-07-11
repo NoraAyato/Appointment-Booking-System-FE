@@ -1,37 +1,4 @@
-import type { HomeAboutValue, HomeCustomerReview } from '../types/home-type';
-
-export const homeCustomerReviews: HomeCustomerReview[] = [
-  {
-    id: 'review-01',
-    customerName: 'Minh Anh',
-    serviceName: 'Deep Facial',
-    rating: 5,
-    comment:
-      'Không gian sạch, lịch hẹn rõ ràng và nhân viên tư vấn rất kỹ. Mình thích nhất là quy trình không bị vội.',
-    avatarUrl: 'https://i.pravatar.cc/120?img=32',
-    visitedAt: '12/06/2026',
-  },
-  {
-    id: 'review-02',
-    customerName: 'Quốc Bảo',
-    serviceName: 'Phục hồi cổ vai gáy',
-    rating: 5,
-    comment:
-      'Đặt lịch nhanh, đến nơi không phải chờ lâu. Sau buổi trị liệu cổ vai gáy nhẹ hơn hẳn.',
-    avatarUrl: 'https://i.pravatar.cc/120?img=12',
-    visitedAt: '18/06/2026',
-  },
-  {
-    id: 'review-03',
-    customerName: 'Hà Linh',
-    serviceName: 'Gói thư giãn cuối tuần',
-    rating: 4.8,
-    comment:
-      'Giao diện đặt lịch dễ hiểu, thông tin dịch vụ rõ nên mình chọn được khung giờ phù hợp ngay lần đầu.',
-    avatarUrl: 'https://i.pravatar.cc/120?img=47',
-    visitedAt: '24/06/2026',
-  },
-];
+import type { HomeAboutValue } from '../types/home-type';
 
 export const homeAboutValues: HomeAboutValue[] = [
   {
