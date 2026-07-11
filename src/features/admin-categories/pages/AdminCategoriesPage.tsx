@@ -13,8 +13,8 @@ import {
   Modal,
   Popconfirm,
   Space,
+  Tag,
   Tooltip,
-  Typography,
   notification,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -26,6 +26,8 @@ import { useTable } from '@/shared/hooks/useTable';
 import { getApiErrorMessage } from '@/shared/utils/api-error';
 
 import { adminCategoryRoleAdminApi } from '../api/admin-category-api';
+import { CategoryColorPicker } from '../components/CategoryColorPicker';
+import { DEFAULT_ADMIN_CATEGORY_TAG_COLOR } from '../constants/admin-category-colors';
 import type {
   AdminCategory,
   AdminCategoryFilterParams,
@@ -34,6 +36,24 @@ import type {
 
 type CategoryModalMode = 'create' | 'update';
 type CategoryFilterFormValues = Pick<AdminCategoryFilterParams, 'keyword'>;
+
+const HEX_COLOR_PATTERN = /^#[0-9A-Fa-f]{6}$/;
+
+const normalizeCategoryTagColor = (tagColor?: string) => {
+  const candidate = tagColor ?? '';
+
+  return HEX_COLOR_PATTERN.test(candidate) ? candidate : DEFAULT_ADMIN_CATEGORY_TAG_COLOR;
+};
+
+const getReadableTagTextColor = (tagColor: string) => {
+  const colorValue = normalizeCategoryTagColor(tagColor).replace('#', '');
+  const red = Number.parseInt(colorValue.slice(0, 2), 16);
+  const green = Number.parseInt(colorValue.slice(2, 4), 16);
+  const blue = Number.parseInt(colorValue.slice(4, 6), 16);
+  const brightness = (red * 299 + green * 587 + blue * 114) / 1000;
+
+  return brightness > 150 ? '#111827' : '#FFFFFF';
+};
 
 export function AdminCategoriesPage() {
   const [filterForm] = Form.useForm<CategoryFilterFormValues>();
@@ -79,6 +99,9 @@ export function AdminCategoriesPage() {
     setModalMode('create');
     setSelectedCategory(null);
     categoryForm.resetFields();
+    categoryForm.setFieldsValue({
+      tagColor: DEFAULT_ADMIN_CATEGORY_TAG_COLOR,
+    });
     setModalOpen(true);
   };
 
@@ -88,6 +111,7 @@ export function AdminCategoriesPage() {
     categoryForm.setFieldsValue({
       description: category.description,
       name: category.name,
+      tagColor: category.tagColor || DEFAULT_ADMIN_CATEGORY_TAG_COLOR,
     });
     setModalOpen(true);
   };
@@ -102,10 +126,16 @@ export function AdminCategoriesPage() {
     setMutationLoading(true);
 
     try {
+      const payload: AdminCategoryPayload = {
+        name: values.name,
+        tagColor: values.tagColor || DEFAULT_ADMIN_CATEGORY_TAG_COLOR,
+        description: values.description,
+      };
+
       const response =
         modalMode === 'create'
-          ? await adminCategoryRoleAdminApi.create(values)
-          : await adminCategoryRoleAdminApi.update(selectedCategory!.id, values);
+          ? await adminCategoryRoleAdminApi.create(payload)
+          : await adminCategoryRoleAdminApi.update(selectedCategory!.id, payload);
 
       if (!response.success) {
         throw new Error(response.message || 'Không thể lưu danh mục.');
@@ -160,7 +190,23 @@ export function AdminCategoriesPage() {
     {
       title: 'Tên danh mục',
       dataIndex: 'name',
-      render: (name: string) => <Typography.Text strong>{name}</Typography.Text>,
+      render: (name: string, record) => {
+        const tagColor = normalizeCategoryTagColor(record.tagColor);
+
+        return (
+          <Tag
+            className="!m-0 max-w-full rounded-md px-3 py-1 font-semibold"
+            style={{
+              backgroundColor: tagColor,
+              borderColor: tagColor,
+              color: getReadableTagTextColor(tagColor),
+            }}
+            title={name}
+          >
+            {name}
+          </Tag>
+        );
+      },
     },
     {
       title: 'Mô tả',
@@ -286,6 +332,7 @@ export function AdminCategoriesPage() {
       >
         <Form<AdminCategoryPayload>
           form={categoryForm}
+          initialValues={{ tagColor: DEFAULT_ADMIN_CATEGORY_TAG_COLOR }}
           layout="vertical"
           onFinish={handleSubmitCategory}
         >
@@ -298,6 +345,19 @@ export function AdminCategoriesPage() {
             ]}
           >
             <Input placeholder="Nhập tên danh mục" maxLength={100} />
+          </Form.Item>
+          <Form.Item
+            name="tagColor"
+            label="Màu tag"
+            rules={[
+              { required: true, message: 'Vui lòng chọn màu tag.' },
+              {
+                pattern: HEX_COLOR_PATTERN,
+                message: 'Màu tag phải có dạng HEX, ví dụ #FF5733.',
+              },
+            ]}
+          >
+            <CategoryColorPicker />
           </Form.Item>
           <Form.Item
             name="description"

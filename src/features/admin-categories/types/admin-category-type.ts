@@ -3,6 +3,7 @@ import type { FilterParams } from '@/shared/types/filter-params-type';
 export interface AdminCategory {
   id: string;
   name: string;
+  tagColor: string;
   description: string;
   totalService: number;
 }
@@ -13,5 +14,6 @@ export interface AdminCategoryFilterParams extends FilterParams {
 
 export interface AdminCategoryPayload {
   name: string;
+  tagColor: string;
   description: string;
 }

@@ -15,6 +15,7 @@ import {
   Modal,
   Popconfirm,
   Space,
+  Switch,
   Tag,
   TimePicker,
   Tooltip,
@@ -53,13 +54,17 @@ type BlockedSlotFilterFormValues = Pick<AdminBlockedSlotFilterParams, 'keyWord' 
 
 const ALL_STAFF_VALUE = '__ALL_STAFF__';
 
-const formatDate = (value: string) => {
+const formatDate = (value?: string | null) => {
+  if (!value) {
+    return 'Mọi ngày';
+  }
+
   const parsedDate = dayjs(value);
 
   return parsedDate.isValid() ? parsedDate.format('DD/MM/YYYY') : value;
 };
 
-const formatTime = (value: string) => {
+const formatTime = (value?: string | null) => {
   if (!value) {
     return 'Chưa cập nhật';
   }
@@ -67,13 +72,29 @@ const formatTime = (value: string) => {
   return value.length >= 5 ? value.slice(0, 5) : value;
 };
 
+const formatTimeRange = (startTime?: string | null, endTime?: string | null) => {
+  if (!startTime && !endTime) {
+    return 'Cả ngày';
+  }
+
+  if (startTime && endTime) {
+    return `${formatTime(startTime)} - ${formatTime(endTime)}`;
+  }
+
+  if (startTime) {
+    return `Từ ${formatTime(startTime)}`;
+  }
+
+  return `Đến ${formatTime(endTime)}`;
+};
+
 const toCreatePayload = (values: AdminBlockedSlotFormValues): CreateAdminBlockedSlotPayload => ({
-  blockedDate: values.blockedDate.format('YYYY-MM-DD'),
-  endTime: values.endTime.format('HH:mm:ss'),
+  blockedDate: values.isEveryDay ? null : (values.blockedDate?.format('YYYY-MM-DD') ?? null),
+  endTime: values.isAllDay ? null : (values.endTime?.format('HH:mm:ss') ?? null),
   reason: values.reason.trim(),
-  startTime: values.startTime.format('HH:mm:ss'),
+  startTime: values.isAllDay ? null : (values.startTime?.format('HH:mm:ss') ?? null),
   status: values.status,
-  userId: values.userId && values.userId !== ALL_STAFF_VALUE ? values.userId : undefined,
+  userId: values.userId && values.userId !== ALL_STAFF_VALUE ? values.userId : null,
 });
 
 export function AdminBlockedSlotsPage() {
@@ -87,6 +108,8 @@ export function AdminBlockedSlotsPage() {
   const [staffOptions, setStaffOptions] = useState<AdminStaffOption[]>([]);
   const [staffOptionsLoading, setStaffOptionsLoading] = useState(false);
   const lastListErrorRef = useRef<string | null>(null);
+  const isEveryDay = Form.useWatch('isEveryDay', createForm);
+  const isAllDay = Form.useWatch('isAllDay', createForm);
 
   const {
     currentPage,
@@ -155,7 +178,10 @@ export function AdminBlockedSlotsPage() {
   };
 
   const openCreateModal = () => {
+    createForm.resetFields();
     createForm.setFieldsValue({
+      isAllDay: false,
+      isEveryDay: false,
       status: 'PENDING',
       userId: ALL_STAFF_VALUE,
     });
@@ -181,6 +207,24 @@ export function AdminBlockedSlotsPage() {
   const closeUpdateStatusModal = () => {
     setSelectedBlockedSlot(null);
     updateStatusForm.resetFields();
+  };
+
+  const handleEveryDayChange = (checked: boolean) => {
+    if (checked) {
+      createForm.setFieldValue('blockedDate', null);
+    }
+  };
+
+  const handleAllDayChange = (checked: boolean) => {
+    if (!checked) {
+      return;
+    }
+
+    createForm.setFieldsValue({
+      endTime: null,
+      isEveryDay: false,
+      startTime: null,
+    });
   };
 
   const handleCreateBlockedSlot = async (values: AdminBlockedSlotFormValues) => {
@@ -277,14 +321,16 @@ export function AdminBlockedSlotsPage() {
     {
       title: 'Nhân viên',
       dataIndex: 'staffName',
-      render: (staffName: string, record) => (
-        <Space>
-          <Avatar src={getAssetUrl(record.avatarUrl)}>
-            {getAvatarInitial(staffName)}
-          </Avatar>
-          <Typography.Text strong>{staffName || 'Tất cả nhân viên'}</Typography.Text>
-        </Space>
-      ),
+      render: (staffName: string | null, record) => {
+        const displayName = staffName || 'Tất cả nhân viên';
+
+        return (
+          <Space>
+            <Avatar src={getAssetUrl(record.avatarUrl)}>{getAvatarInitial(displayName)}</Avatar>
+            <Typography.Text strong>{displayName}</Typography.Text>
+          </Space>
+        );
+      },
     },
     {
       title: 'Lý do',
@@ -301,7 +347,7 @@ export function AdminBlockedSlotsPage() {
       title: 'Khung giờ',
       key: 'timeRange',
       width: 140,
-      render: (_, record) => `${formatTime(record.startTime)} - ${formatTime(record.endTime)}`,
+      render: (_, record) => formatTimeRange(record.startTime, record.endTime),
     },
     {
       title: 'Trạng thái',
@@ -448,29 +494,96 @@ export function AdminBlockedSlotsPage() {
           >
             <Input.TextArea rows={3} placeholder="Nhập lý do khóa lịch" />
           </Form.Item>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Form.Item
+              name="isEveryDay"
+              label="Áp dụng mọi ngày"
+              valuePropName="checked"
+              className="!mb-0"
+            >
+              <Switch
+                checkedChildren="Mọi ngày"
+                disabled={Boolean(isAllDay)}
+                unCheckedChildren="Theo ngày"
+                onChange={handleEveryDayChange}
+              />
+            </Form.Item>
+            <Form.Item
+              name="isAllDay"
+              label="Chặn cả ngày"
+              valuePropName="checked"
+              className="!mb-0"
+            >
+              <Switch
+                checkedChildren="Cả ngày"
+                unCheckedChildren="Theo giờ"
+                onChange={handleAllDayChange}
+              />
+            </Form.Item>
+          </div>
           <Form.Item
             name="blockedDate"
             label="Ngày khóa"
-            rules={[{ required: true, message: 'Vui lòng chọn ngày khóa.' }]}
+            dependencies={['isEveryDay', 'isAllDay']}
+            rules={[
+              ({ getFieldValue }) => ({
+                validator(_, value?: Dayjs | null) {
+                  if (getFieldValue('isEveryDay') || value) {
+                    return Promise.resolve();
+                  }
+
+                  return Promise.reject(
+                    new Error('Vui lòng chọn ngày khóa hoặc bật áp dụng mọi ngày.'),
+                  );
+                },
+              }),
+            ]}
           >
-            <DatePicker className="w-full" format="DD/MM/YYYY" />
+            <DatePicker
+              className="w-full"
+              disabled={Boolean(isEveryDay)}
+              format="DD/MM/YYYY"
+            />
           </Form.Item>
           <div className="grid gap-3 md:grid-cols-2">
             <Form.Item
               name="startTime"
               label="Giờ bắt đầu"
-              rules={[{ required: true, message: 'Vui lòng chọn giờ bắt đầu.' }]}
+              dependencies={['isAllDay']}
+              rules={[
+                ({ getFieldValue }) => ({
+                  validator(_, value?: Dayjs | null) {
+                    if (getFieldValue('isAllDay') || value) {
+                      return Promise.resolve();
+                    }
+
+                    return Promise.reject(new Error('Vui lòng chọn giờ bắt đầu.'));
+                  },
+                }),
+              ]}
             >
-              <TimePicker className="w-full" format="HH:mm" minuteStep={5} />
+              <TimePicker
+                className="w-full"
+                disabled={Boolean(isAllDay)}
+                format="HH:mm"
+                minuteStep={5}
+              />
             </Form.Item>
             <Form.Item
               name="endTime"
               label="Giờ kết thúc"
-              dependencies={['startTime']}
+              dependencies={['startTime', 'isAllDay']}
               rules={[
-                { required: true, message: 'Vui lòng chọn giờ kết thúc.' },
                 ({ getFieldValue }) => ({
-                  validator(_, value) {
+                  validator(_, value?: Dayjs | null) {
+                    if (getFieldValue('isAllDay')) {
+                      return Promise.resolve();
+                    }
+
+                    if (!value) {
+                      return Promise.reject(new Error('Vui lòng chọn giờ kết thúc.'));
+                    }
+
                     const startTime = getFieldValue('startTime') as Dayjs | undefined;
 
                     if (!value || !startTime || value.isAfter(startTime)) {
@@ -482,7 +595,12 @@ export function AdminBlockedSlotsPage() {
                 }),
               ]}
             >
-              <TimePicker className="w-full" format="HH:mm" minuteStep={5} />
+              <TimePicker
+                className="w-full"
+                disabled={Boolean(isAllDay)}
+                format="HH:mm"
+                minuteStep={5}
+              />
             </Form.Item>
           </div>
           <Form.Item
@@ -508,9 +626,10 @@ export function AdminBlockedSlotsPage() {
           <Typography.Text strong>{selectedBlockedSlot?.staffName || 'Tất cả nhân viên'}</Typography.Text>
           <div className="text-sm text-slate-500">
             {selectedBlockedSlot
-              ? `${formatDate(selectedBlockedSlot.blockedDate)} | ${formatTime(
+              ? `${formatDate(selectedBlockedSlot.blockedDate)} | ${formatTimeRange(
                   selectedBlockedSlot.startTime,
-                )} - ${formatTime(selectedBlockedSlot.endTime)}`
+                  selectedBlockedSlot.endTime,
+                )}`
               : null}
           </div>
         </div>

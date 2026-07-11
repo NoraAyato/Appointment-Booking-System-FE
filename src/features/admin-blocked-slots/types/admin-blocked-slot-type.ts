@@ -6,13 +6,13 @@ export type AdminBlockedSlotStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface AdminBlockedSlot {
   id: number;
-  staffName: string;
-  avatarUrl: string;
+  staffName: string | null;
+  avatarUrl: string | null;
   reason: string;
   status: AdminBlockedSlotStatus | string;
-  blockedDate: string;
-  startTime: string;
-  endTime: string;
+  blockedDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
 }
 
 export interface AdminBlockedSlotFilterParams extends FilterParams {
@@ -21,11 +21,11 @@ export interface AdminBlockedSlotFilterParams extends FilterParams {
 }
 
 export interface CreateAdminBlockedSlotPayload {
-  userId?: string;
+  userId?: string | null;
   reason: string;
-  blockedDate: string;
-  startTime: string;
-  endTime: string;
+  blockedDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
   status: AdminBlockedSlotStatus;
 }
 
@@ -36,8 +36,10 @@ export interface UpdateAdminBlockedSlotStatusPayload {
 export interface AdminBlockedSlotFormValues {
   userId?: string;
   reason: string;
-  blockedDate: Dayjs;
-  startTime: Dayjs;
-  endTime: Dayjs;
+  blockedDate?: Dayjs | null;
+  startTime?: Dayjs | null;
+  endTime?: Dayjs | null;
   status: AdminBlockedSlotStatus;
+  isEveryDay?: boolean;
+  isAllDay?: boolean;
 }
