@@ -19,8 +19,11 @@ import {
   adminDashboardNavItems,
   staffDashboardNavItems,
 } from '@/features/dashboard/constants/dashboard-nav';
-import { AdminDashboardPage } from '@/features/dashboard/pages/AdminDashboardPage';
-import { StaffDashboardPage } from '@/features/dashboard/pages/StaffDashboardPage';
+import { AdminDashboardPage } from '@/features/admin-dashboard/pages/AdminDashboardPage';
+import { StaffAppointmentsPage } from '@/features/staff-appointments/pages/StaffAppointmentsPage';
+import { StaffDashboardPage } from '@/features/staff-dashboard/pages/StaffDashboardPage';
+import { StaffLeaveRequestsPage } from '@/features/staff-leave-requests/pages/StaffLeaveRequestsPage';
+import { StaffShiftsPage } from '@/features/staff-shifts/pages/StaffShiftsPage';
 import { HomePage } from '@/features/home/pages/HomePage';
 import { ProfilePage } from '@/features/profile/pages/ProfilePage';
 import { PromotionsPage } from '@/features/promotions/pages/PromotionsPage';
@@ -92,7 +95,7 @@ export const router = createBrowserRouter([
             <DashboardLayout
               navItems={staffDashboardNavItems}
               title="HomeFeel Staff"
-              subtitle="Lịch làm việc"
+              subtitle="Không gian làm việc nhân viên"
             />
           </ProtectedRoute>
         ),
@@ -100,6 +103,18 @@ export const router = createBrowserRouter([
           {
             index: true,
             element: <StaffDashboardPage />,
+          },
+          {
+            path: 'appointments',
+            element: <StaffAppointmentsPage />,
+          },
+          {
+            path: 'work-shifts',
+            element: <StaffShiftsPage />,
+          },
+          {
+            path: 'leave-requests',
+            element: <StaffLeaveRequestsPage />,
           },
         ],
       },
@@ -110,7 +125,7 @@ export const router = createBrowserRouter([
             <DashboardLayout
               navItems={adminDashboardNavItems}
               title="HomeFeel Admin"
-              subtitle="Quản trị hệ thống đặt lịch"
+              subtitle="Điều phối vận hành đặt lịch"
             />
           </ProtectedRoute>
         ),

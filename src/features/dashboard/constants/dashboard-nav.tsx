@@ -3,6 +3,8 @@ import {
   ApartmentOutlined,
   BarChartOutlined,
   CalendarOutlined,
+  CarryOutOutlined,
+  ClockCircleOutlined,
   GiftOutlined,
   LockOutlined,
   MessageOutlined,
@@ -17,7 +19,7 @@ import type { DashboardNavItem } from '../types/dashboard-type';
 export const adminDashboardNavItems: DashboardNavItem[] = [
   {
     key: 'statistics',
-    label: 'Thống kê',
+    label: 'Tổng quan vận hành',
     path: '/admin/dashboard',
     icon: <BarChartOutlined />,
   },
@@ -87,9 +89,27 @@ export const adminDashboardNavItems: DashboardNavItem[] = [
 
 export const staffDashboardNavItems: DashboardNavItem[] = [
   {
-    key: 'schedule',
-    label: 'Lịch làm việc',
+    key: 'staff-dashboard',
+    label: 'Tổng quan công việc',
     path: '/staff/dashboard',
     icon: <CalendarOutlined />,
+  },
+  {
+    key: 'staff-appointments',
+    label: 'Lịch hẹn của tôi',
+    path: '/staff/dashboard/appointments',
+    icon: <CarryOutOutlined />,
+  },
+  {
+    key: 'my-shifts',
+    label: 'Ca làm việc của tôi',
+    path: '/staff/dashboard/work-shifts',
+    icon: <ClockCircleOutlined />,
+  },
+  {
+    key: 'leave-requests',
+    label: 'Xin nghỉ',
+    path: '/staff/dashboard/leave-requests',
+    icon: <LockOutlined />,
   },
 ];
