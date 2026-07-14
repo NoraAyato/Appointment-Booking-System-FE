@@ -2,7 +2,7 @@ import type { Dayjs } from 'dayjs';
 
 import type { FilterParams } from '@/shared/types/filter-params-type';
 
-export type AdminBlockedSlotStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type AdminBlockedSlotStatus = 'DEFAULT' | 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface AdminBlockedSlot {
   id: number;

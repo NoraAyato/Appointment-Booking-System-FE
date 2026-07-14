@@ -21,7 +21,6 @@ import {
   notification,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 
 import { DashboardPage } from '@/features/dashboard/components/DashboardPage';
@@ -31,6 +30,7 @@ import { useTable } from '@/shared/hooks/useTable';
 import { getApiErrorMessage } from '@/shared/utils/api-error';
 import { getAssetUrl } from '@/shared/utils/asset-url';
 import { getAvatarInitial } from '@/shared/utils/avatar';
+import { formatDateTime } from '@/shared/utils/date-format';
 
 import { adminReviewRoleAdminApi } from '../api/admin-review-api';
 import {
@@ -44,12 +44,6 @@ import type {
 } from '../types/admin-review-type';
 
 type ReviewFilterFormValues = Pick<AdminReviewFilterParams, 'keyWord' | 'status'>;
-
-const formatDateTime = (value: string) => {
-  const parsedDate = dayjs(value);
-
-  return parsedDate.isValid() ? parsedDate.format('DD/MM/YYYY HH:mm') : value;
-};
 
 export function AdminReviewsPage() {
   const [filterForm] = Form.useForm<ReviewFilterFormValues>();
@@ -189,7 +183,7 @@ export function AdminReviewsPage() {
       title: 'Ngày tạo',
       dataIndex: 'createAt',
       width: 160,
-      render: formatDateTime,
+      render: (value: string) => formatDateTime(value),
     },
     {
       title: 'Trạng thái',

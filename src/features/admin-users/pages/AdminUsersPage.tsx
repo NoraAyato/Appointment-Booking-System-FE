@@ -21,7 +21,6 @@ import {
   notification,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 
 import { DashboardPage } from '@/features/dashboard/components/DashboardPage';
@@ -30,6 +29,7 @@ import { DataTable } from '@/shared/components/DataTable';
 import { useTable } from '@/shared/hooks/useTable';
 import { getApiErrorMessage } from '@/shared/utils/api-error';
 import { getAvatarInitial } from '@/shared/utils/avatar';
+import { formatDate } from '@/shared/utils/date-format';
 
 import { adminUserRoleAdminApi } from '../api/admin-user-api';
 import {
@@ -47,16 +47,6 @@ import type {
 } from '../types/admin-user-type';
 
 type AdminUserFilterFormValues = Omit<AdminUserFilterParams, 'page' | 'limit'>;
-
-const formatJoinDate = (joinDate: string) => {
-  if (!joinDate) {
-    return 'Chưa cập nhật';
-  }
-
-  const parsedDate = dayjs(joinDate);
-
-  return parsedDate.isValid() ? parsedDate.format('DD/MM/YYYY') : joinDate;
-};
 
 export function AdminUsersPage() {
   const [form] = Form.useForm<AdminUserFilterFormValues>();
@@ -198,7 +188,7 @@ export function AdminUsersPage() {
     {
       title: 'Ngày tham gia',
       dataIndex: 'joinDate',
-      render: formatJoinDate,
+      render: (joinDate: string) => formatDate(joinDate),
     },
     {
       title: 'Thao tác',

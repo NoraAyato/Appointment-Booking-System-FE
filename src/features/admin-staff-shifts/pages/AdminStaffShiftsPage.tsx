@@ -33,6 +33,7 @@ import { useTable } from '@/shared/hooks/useTable';
 import { getApiErrorMessage } from '@/shared/utils/api-error';
 import { getAssetUrl } from '@/shared/utils/asset-url';
 import { getAvatarInitial } from '@/shared/utils/avatar';
+import { formatDate, formatTimeRange } from '@/shared/utils/date-format';
 
 import { adminStaffShiftRoleAdminApi } from '../api/admin-staff-shift-api';
 import {
@@ -49,20 +50,6 @@ import type {
 
 type StaffShiftModalMode = 'create' | 'update';
 type StaffShiftFilterFormValues = Pick<AdminStaffShiftFilterParams, 'keyWord' | 'status'>;
-
-const formatDate = (value: string) => {
-  const parsedDate = dayjs(value);
-
-  return parsedDate.isValid() ? parsedDate.format('DD/MM/YYYY') : value;
-};
-
-const formatTime = (value: string) => {
-  if (!value) {
-    return 'Chưa cập nhật';
-  }
-
-  return value.length >= 5 ? value.slice(0, 5) : value;
-};
 
 const toCreatePayload = (values: AdminStaffShiftFormValues): CreateAdminStaffShiftPayload => ({
   endTime: values.endTime.format('HH:mm:ss'),
@@ -250,13 +237,13 @@ export function AdminStaffShiftsPage() {
       title: 'Ngày làm',
       dataIndex: 'workDate',
       width: 130,
-      render: formatDate,
+      render: (value: string) => formatDate(value),
     },
     {
       title: 'Khung giờ',
       key: 'timeRange',
       width: 140,
-      render: (_, record) => `${formatTime(record.startTime)} - ${formatTime(record.endTime)}`,
+      render: (_, record) => formatTimeRange(record.startTime, record.endTime),
     },
     {
       title: 'Dịch vụ phụ trách',

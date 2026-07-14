@@ -36,6 +36,7 @@ import { DataTable } from '@/shared/components/DataTable';
 import { useTable } from '@/shared/hooks/useTable';
 import { getApiErrorMessage } from '@/shared/utils/api-error';
 import { getAssetUrl } from '@/shared/utils/asset-url';
+import { formatDate } from '@/shared/utils/date-format';
 
 import { adminPromotionRoleAdminApi } from '../api/admin-promotion-api';
 import {
@@ -57,12 +58,6 @@ import type {
 type PromotionModalMode = 'create' | 'update';
 
 const toUploadFile = (files?: UploadFile[]) => files?.[0]?.originFileObj;
-
-const formatDate = (value: string) => {
-  const parsedDate = dayjs(value);
-
-  return parsedDate.isValid() ? parsedDate.format('DD/MM/YYYY') : value;
-};
 
 const toCreatePayload = (values: AdminPromotionFormValues): CreateAdminPromotionPayload => ({
   description: values.description.trim(),

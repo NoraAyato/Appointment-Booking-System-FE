@@ -23,7 +23,6 @@ import {
   notification,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -36,9 +35,15 @@ import { useTable } from '@/shared/hooks/useTable';
 import { getApiErrorMessage } from '@/shared/utils/api-error';
 import { getAssetUrl } from '@/shared/utils/asset-url';
 import { getAvatarInitial } from '@/shared/utils/avatar';
+import {
+  formatDate as formatDisplayDate,
+  formatTimeRange as formatDisplayTimeRange,
+} from '@/shared/utils/date-format';
 
 import { adminBlockedSlotRoleAdminApi } from '../api/admin-blocked-slot-api';
 import {
+  ADMIN_BLOCKED_SLOT_DEFAULT_STATUS_OPTIONS,
+  ADMIN_BLOCKED_SLOT_MANUAL_STATUS_OPTIONS,
   ADMIN_BLOCKED_SLOT_STATUS_OPTIONS,
   getAdminBlockedSlotStatusMeta,
 } from '../constants/admin-blocked-slot-options';
@@ -54,46 +59,12 @@ type BlockedSlotFilterFormValues = Pick<AdminBlockedSlotFilterParams, 'keyWord' 
 
 const ALL_STAFF_VALUE = '__ALL_STAFF__';
 
-const formatDate = (value?: string | null) => {
-  if (!value) {
-    return 'Mọi ngày';
-  }
-
-  const parsedDate = dayjs(value);
-
-  return parsedDate.isValid() ? parsedDate.format('DD/MM/YYYY') : value;
-};
-
-const formatTime = (value?: string | null) => {
-  if (!value) {
-    return 'Chưa cập nhật';
-  }
-
-  return value.length >= 5 ? value.slice(0, 5) : value;
-};
-
-const formatTimeRange = (startTime?: string | null, endTime?: string | null) => {
-  if (!startTime && !endTime) {
-    return 'Cả ngày';
-  }
-
-  if (startTime && endTime) {
-    return `${formatTime(startTime)} - ${formatTime(endTime)}`;
-  }
-
-  if (startTime) {
-    return `Từ ${formatTime(startTime)}`;
-  }
-
-  return `Đến ${formatTime(endTime)}`;
-};
-
 const toCreatePayload = (values: AdminBlockedSlotFormValues): CreateAdminBlockedSlotPayload => ({
   blockedDate: values.isEveryDay ? null : (values.blockedDate?.format('YYYY-MM-DD') ?? null),
   endTime: values.isAllDay ? null : (values.endTime?.format('HH:mm:ss') ?? null),
   reason: values.reason.trim(),
   startTime: values.isAllDay ? null : (values.startTime?.format('HH:mm:ss') ?? null),
-  status: values.status,
+  status: values.userId && values.userId !== ALL_STAFF_VALUE ? values.status : 'DEFAULT',
   userId: values.userId && values.userId !== ALL_STAFF_VALUE ? values.userId : null,
 });
 
@@ -108,6 +79,7 @@ export function AdminBlockedSlotsPage() {
   const [staffOptions, setStaffOptions] = useState<AdminStaffOption[]>([]);
   const [staffOptionsLoading, setStaffOptionsLoading] = useState(false);
   const lastListErrorRef = useRef<string | null>(null);
+  const selectedCreateUserId = Form.useWatch('userId', createForm);
   const isEveryDay = Form.useWatch('isEveryDay', createForm);
   const isAllDay = Form.useWatch('isAllDay', createForm);
 
@@ -141,6 +113,11 @@ export function AdminBlockedSlotsPage() {
     ],
     [staffOptions],
   );
+
+  const isAllStaffSelected = !selectedCreateUserId || selectedCreateUserId === ALL_STAFF_VALUE;
+  const createStatusOptions = isAllStaffSelected
+    ? ADMIN_BLOCKED_SLOT_DEFAULT_STATUS_OPTIONS
+    : ADMIN_BLOCKED_SLOT_MANUAL_STATUS_OPTIONS;
 
   useEffect(() => {
     if (!error || lastListErrorRef.current === error) {
@@ -182,7 +159,7 @@ export function AdminBlockedSlotsPage() {
     createForm.setFieldsValue({
       isAllDay: false,
       isEveryDay: false,
-      status: 'PENDING',
+      status: 'DEFAULT',
       userId: ALL_STAFF_VALUE,
     });
     setCreateModalOpen(true);
@@ -225,6 +202,10 @@ export function AdminBlockedSlotsPage() {
       isEveryDay: false,
       startTime: null,
     });
+  };
+
+  const handleStaffChange = (value?: string) => {
+    createForm.setFieldValue('status', value && value !== ALL_STAFF_VALUE ? 'PENDING' : 'DEFAULT');
   };
 
   const handleCreateBlockedSlot = async (values: AdminBlockedSlotFormValues) => {
@@ -341,13 +322,13 @@ export function AdminBlockedSlotsPage() {
       title: 'Ngày khóa',
       dataIndex: 'blockedDate',
       width: 130,
-      render: formatDate,
+      render: (value?: string | null) => formatDisplayDate(value, 'Mọi ngày'),
     },
     {
       title: 'Khung giờ',
       key: 'timeRange',
       width: 140,
-      render: (_, record) => formatTimeRange(record.startTime, record.endTime),
+      render: (_, record) => formatDisplayTimeRange(record.startTime, record.endTime, 'Cả ngày'),
     },
     {
       title: 'Trạng thái',
@@ -485,6 +466,7 @@ export function AdminBlockedSlotsPage() {
               loading={staffOptionsLoading}
               options={staffSelectOptions}
               placeholder="Tất cả nhân viên"
+              onChange={handleStaffChange}
             />
           </Form.Item>
           <Form.Item
@@ -608,8 +590,17 @@ export function AdminBlockedSlotsPage() {
             label="Trạng thái"
             rules={[{ required: true, message: 'Vui lòng chọn trạng thái.' }]}
           >
-            <AppSelect options={ADMIN_BLOCKED_SLOT_STATUS_OPTIONS} placeholder="Chọn trạng thái" />
+            <AppSelect
+              disabled={isAllStaffSelected}
+              options={createStatusOptions}
+              placeholder="Chọn trạng thái"
+            />
           </Form.Item>
+          {isAllStaffSelected ? (
+            <Typography.Text className="block !text-xs !text-slate-500">
+              Khóa lịch cho tất cả nhân viên sẽ dùng trạng thái Mặc định.
+            </Typography.Text>
+          ) : null}
         </Form>
       </Modal>
 
@@ -626,9 +617,10 @@ export function AdminBlockedSlotsPage() {
           <Typography.Text strong>{selectedBlockedSlot?.staffName || 'Tất cả nhân viên'}</Typography.Text>
           <div className="text-sm text-slate-500">
             {selectedBlockedSlot
-              ? `${formatDate(selectedBlockedSlot.blockedDate)} | ${formatTimeRange(
+              ? `${formatDisplayDate(selectedBlockedSlot.blockedDate, 'Mọi ngày')} | ${formatDisplayTimeRange(
                   selectedBlockedSlot.startTime,
                   selectedBlockedSlot.endTime,
+                  'Cả ngày',
                 )}`
               : null}
           </div>
