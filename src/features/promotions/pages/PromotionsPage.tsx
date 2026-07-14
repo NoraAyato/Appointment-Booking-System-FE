@@ -1,60 +1,83 @@
-import { GiftOutlined, PercentageOutlined, ThunderboltOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Row, Space, Tag, Typography } from 'antd';
+import { Col, Row, Typography } from 'antd';
+import { useMemo, useState } from 'react';
 
-const promotions = [
-  {
-    id: 'promo-01',
-    title: 'Wellness Starter',
-    value: 'Giảm 20%',
-    description: 'Áp dụng cho lần đặt lịch đầu tiên trong nhóm dịch vụ wellness.',
-    icon: <GiftOutlined />,
-    color: '#2f7d67',
-  },
-  {
-    id: 'promo-02',
-    title: 'Combo tư vấn tháng',
-    value: 'Tiết kiệm 150K',
-    description: 'Dành cho khách đặt từ 2 buổi tư vấn trong cùng tháng.',
-    icon: <PercentageOutlined />,
-    color: '#de7d62',
-  },
-  {
-    id: 'promo-03',
-    title: 'Khung giờ nhanh',
-    value: 'Ưu tiên xác nhận',
-    description: 'Các lịch trống trong 24 giờ tới được staff xác nhận ưu tiên.',
-    icon: <ThunderboltOutlined />,
-    color: '#d99530',
-  },
-];
+import { AppPagination } from '@/shared/components/AppPagination';
+
+import { PromotionCard } from '../components/PromotionCard';
+import { PROMOTION_PAGE_SIZE, promotionMockData } from '../constants/promotion-mock-data';
 
 export function PromotionsPage() {
-  return (
-    <main className="mx-auto max-w-7xl px-4 py-10 md:px-8">
-      <Typography.Title level={2}>Khuyến mãi</Typography.Title>
-      <Typography.Text className="text-slate-500">
-        Các ưu đãi mock để hoàn thiện luồng menu user và trang nội dung.
-      </Typography.Text>
+  const [page, setPage] = useState(1);
 
-      <Row gutter={[20, 20]} className="mt-6">
-        {promotions.map((promotion) => (
-          <Col key={promotion.id} xs={24} md={8}>
-            <Card className="h-full">
-              <Space direction="vertical" size={14}>
-                <div className="promo-icon" style={{ color: promotion.color }}>
-                  {promotion.icon}
-                </div>
-                <Tag color={promotion.color}>{promotion.value}</Tag>
-                <Typography.Title level={3} className="!mb-0">
-                  {promotion.title}
-                </Typography.Title>
-                <Typography.Text className="text-slate-500">{promotion.description}</Typography.Text>
-                <Button type="default">Xem ưu đãi</Button>
-              </Space>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+  const paginatedPromotions = useMemo(() => {
+    const startIndex = (page - 1) * PROMOTION_PAGE_SIZE;
+
+    return promotionMockData.slice(startIndex, startIndex + PROMOTION_PAGE_SIZE);
+  }, [page]);
+
+  return (
+    <main className="promotion-page bg-[#f7f4ee]">
+      <section className="promotion-hero">
+        <div className="mx-auto max-w-7xl px-4 py-12 md:px-8 lg:py-16">
+          <div className="flex flex-col justify-center">
+            <Typography.Text className="mb-3 !font-semibold uppercase tracking-[0.18em] !text-sage">
+              Khuyến mãi HomeFeel
+            </Typography.Text>
+            <Typography.Title className="!mb-5 max-w-3xl !text-[42px] !leading-tight !text-ink md:!text-[56px]">
+              Ưu đãi chăm sóc được chọn lọc cho lịch hẹn của bạn
+            </Typography.Title>
+            <Typography.Paragraph className="max-w-2xl !text-lg !leading-8 !text-slate-600">
+              Khám phá các mã giảm giá, combo dịch vụ và ưu đãi theo mùa tại HomeFeel Center.
+              Mỗi ưu đãi hiển thị rõ mã, thời hạn và điều kiện áp dụng để khách dễ theo dõi.
+            </Typography.Paragraph>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-10">
+        <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <Typography.Title level={3} className="!mb-1">
+              Danh sách khuyến mãi
+            </Typography.Title>
+            <Typography.Text className="!text-slate-500">
+              Các ưu đãi hiện có tại HomeFeel Center.
+            </Typography.Text>
+          </div>
+          <Typography.Text className="!text-slate-500">
+            {promotionMockData.length} khuyến mãi
+          </Typography.Text>
+        </div>
+
+        <Row gutter={[20, 20]}>
+          {paginatedPromotions.map((promotion) => (
+            <Col key={promotion.id} xs={24} md={12} xl={8}>
+              <PromotionCard promotion={promotion} />
+            </Col>
+          ))}
+        </Row>
+
+        {promotionMockData.length > PROMOTION_PAGE_SIZE ? (
+          <div className="promotion-pagination-bar mt-8">
+            <div>
+              <Typography.Text className="block !font-semibold !text-ink">
+                {promotionMockData.length} khuyến mãi
+              </Typography.Text>
+              <Typography.Text className="!text-sm !text-slate-500">
+                Trang {page} trên {Math.ceil(promotionMockData.length / PROMOTION_PAGE_SIZE)}
+              </Typography.Text>
+            </div>
+            <AppPagination
+              current={page}
+              pageSize={PROMOTION_PAGE_SIZE}
+              total={promotionMockData.length}
+              showSizeChanger={false}
+              showTotal={false}
+              onChange={(nextPage) => setPage(nextPage)}
+            />
+          </div>
+        ) : null}
+      </section>
     </main>
   );
 }

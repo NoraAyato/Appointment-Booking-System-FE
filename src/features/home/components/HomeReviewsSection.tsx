@@ -1,12 +1,12 @@
 import { ReloadOutlined } from '@ant-design/icons';
 import { Avatar, Button, Card, Col, Empty, Rate, Row, Typography } from 'antd';
-import dayjs from 'dayjs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { publicReviewApi } from '@/features/public-reviews/api/public-review-api';
 import type { PublicTopRatedReviewModel } from '@/features/public-reviews/types/public-review-type';
 import { getApiErrorMessage } from '@/shared/utils/api-error';
 import { getAvatarInitial } from '@/shared/utils/avatar';
+import { formatDate } from '@/shared/utils/date-format';
 
 const getResponsiveSpan = (total: number) => {
   if (total <= 1) {
@@ -124,7 +124,7 @@ export function HomeReviewsSection() {
                     <div>
                       <Typography.Text strong>{review.customerName}</Typography.Text>
                       <Typography.Text className="block !text-xs !text-slate-500">
-                        {review.serviceName} · {dayjs(review.serviceDate).format('DD/MM/YYYY')}
+                        {review.serviceName} · {formatDate(review.serviceDate)}
                       </Typography.Text>
                     </div>
                   </div>

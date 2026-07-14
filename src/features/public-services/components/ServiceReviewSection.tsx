@@ -1,12 +1,12 @@
 import { ReloadOutlined, StarFilled } from '@ant-design/icons';
 import { Avatar, Button, Card, Empty, Image, Progress, Rate, Space, Tag, Typography } from 'antd';
-import dayjs from 'dayjs';
 
 import type {
   PublicServiceReviewModel,
   PublicServiceReviewStats,
 } from '@/features/public-reviews/types/public-review-type';
 import { AppPagination } from '@/shared/components/AppPagination';
+import { formatDate } from '@/shared/utils/date-format';
 
 import type { PublicServiceCardModel } from '../types/public-service-type';
 
@@ -132,7 +132,7 @@ export function ServiceReviewSection({
                           {review.customerName}
                         </Typography.Text>
                         <Typography.Text className="!text-sm !text-slate-500">
-                          Dịch vụ ngày {dayjs(review.serviceDate).format('DD/MM/YYYY')} với{' '}
+                          Dịch vụ ngày {formatDate(review.serviceDate)} với{' '}
                           {review.staffName}
                         </Typography.Text>
                       </div>
@@ -159,7 +159,7 @@ export function ServiceReviewSection({
                       </Image.PreviewGroup>
                     ) : null}
                     <Typography.Text className="mt-3 block !text-xs !text-slate-400">
-                      Gửi đánh giá {dayjs(review.createdAt).format('DD/MM/YYYY')}
+                      Gửi đánh giá {formatDate(review.createdAt)}
                     </Typography.Text>
                   </div>
                 </article>

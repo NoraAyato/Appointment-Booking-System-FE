@@ -1,8 +1,9 @@
 import { CalendarOutlined } from '@ant-design/icons';
 import { Card, Space, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
+
+import { formatDateTime } from '@/shared/utils/date-format';
 
 import { appointmentApi } from '../api/appointment-api';
 import type { Appointment } from '../types/appointment-type';
@@ -35,7 +36,7 @@ const columns: ColumnsType<Appointment> = [
     title: 'Thời gian',
     dataIndex: 'scheduledAt',
     key: 'scheduledAt',
-    render: (value) => dayjs(value).format('DD/MM/YYYY HH:mm'),
+    render: (value) => formatDateTime(value),
   },
   {
     title: 'Trạng thái',
