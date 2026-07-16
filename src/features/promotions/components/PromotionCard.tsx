@@ -1,13 +1,10 @@
-import {
-  CalendarOutlined,
-  ClockCircleOutlined,
-} from '@ant-design/icons';
+import { CalendarOutlined, ClockCircleOutlined, GiftOutlined } from '@ant-design/icons';
 import { Card, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
 
 import { formatDate } from '@/shared/utils/date-format';
 
-import { promotionStatusLabels } from '../constants/promotion-mock-data';
+import { promotionStatusLabels } from '../constants/promotion-options';
 import type { PromotionCardModel } from '../types/promotion-type';
 
 interface PromotionCardProps {
@@ -43,7 +40,13 @@ export function PromotionCard({ promotion }: PromotionCardProps) {
   return (
     <Card hoverable className="promotion-card h-full overflow-hidden">
       <div className="promotion-card-image">
-        <img alt={promotion.title} src={promotion.imageUrl} />
+        {promotion.imageUrl ? (
+          <img alt={promotion.title} src={promotion.imageUrl} />
+        ) : (
+          <div className="promotion-card-image-fallback">
+            <GiftOutlined />
+          </div>
+        )}
         <div className="promotion-card-shade" />
         <Tag className="promotion-card-status" color={statusColorMap[promotion.status]}>
           {promotionStatusLabels[promotion.status]}

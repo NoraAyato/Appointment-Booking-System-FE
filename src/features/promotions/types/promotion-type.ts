@@ -1,5 +1,20 @@
 export type PromotionStatus = 'ACTIVE' | 'ENDING_SOON' | 'UPCOMING';
 
+export interface PublicPromotionItem {
+  id: string;
+  code: string;
+  description: string;
+  discountLabel: string;
+  startDate: string;
+  endDate: string;
+  image: string | null;
+}
+
+export interface PublicPromotionFilterParams {
+  page: number;
+  limit: number;
+}
+
 export interface PromotionCardModel {
   id: string;
   accentColor: string;
@@ -7,7 +22,7 @@ export interface PromotionCardModel {
   description: string;
   discountLabel: string;
   endDate: string;
-  imageUrl: string;
+  imageUrl?: string;
   minSpend?: number;
   startDate: string;
   status: PromotionStatus;

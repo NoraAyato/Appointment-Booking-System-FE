@@ -1,19 +1,53 @@
-import { Col, Row, Typography } from 'antd';
-import { useMemo, useState } from 'react';
+import { Button, Card, Col, Empty, Row, Typography } from 'antd';
+import { useCallback, useEffect, useState } from 'react';
 
 import { AppPagination } from '@/shared/components/AppPagination';
+import { getApiErrorMessage } from '@/shared/utils/api-error';
 
+import { promotionApi } from '../api/promotion-api';
 import { PromotionCard } from '../components/PromotionCard';
-import { PROMOTION_PAGE_SIZE, promotionMockData } from '../constants/promotion-mock-data';
+import { PROMOTION_PAGE_SIZE } from '../constants/promotion-options';
+import type { PromotionCardModel } from '../types/promotion-type';
 
 export function PromotionsPage() {
+  const [promotions, setPromotions] = useState<PromotionCardModel[]>([]);
+  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const paginatedPromotions = useMemo(() => {
-    const startIndex = (page - 1) * PROMOTION_PAGE_SIZE;
+  const fetchPromotions = useCallback(async () => {
+    setLoading(true);
+    setErrorMessage(null);
 
-    return promotionMockData.slice(startIndex, startIndex + PROMOTION_PAGE_SIZE);
+    try {
+      const response = await promotionApi.getPublicPromotions({
+        limit: PROMOTION_PAGE_SIZE,
+        page,
+      });
+
+      if (!response.success) {
+        throw new Error(response.message || 'Không thể tải danh sách khuyến mãi.');
+      }
+
+      setPromotions(response.data.items);
+      setTotal(response.data.total);
+    } catch (fetchError) {
+      setPromotions([]);
+      setTotal(0);
+      setErrorMessage(
+        getApiErrorMessage(fetchError, 'Không thể tải danh sách khuyến mãi.'),
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [page]);
+
+  useEffect(() => {
+    void fetchPromotions();
+  }, [fetchPromotions]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PROMOTION_PAGE_SIZE));
 
   return (
     <main className="promotion-page bg-[#f7f4ee]">
@@ -44,33 +78,53 @@ export function PromotionsPage() {
               Các ưu đãi hiện có tại HomeFeel Center.
             </Typography.Text>
           </div>
-          <Typography.Text className="!text-slate-500">
-            {promotionMockData.length} khuyến mãi
-          </Typography.Text>
+          <Typography.Text className="!text-slate-500">{total} khuyến mãi</Typography.Text>
         </div>
 
-        <Row gutter={[20, 20]}>
-          {paginatedPromotions.map((promotion) => (
-            <Col key={promotion.id} xs={24} md={12} xl={8}>
-              <PromotionCard promotion={promotion} />
-            </Col>
-          ))}
-        </Row>
+        {loading ? (
+          <Row gutter={[20, 20]}>
+            {Array.from({ length: PROMOTION_PAGE_SIZE }).map((_, index) => (
+              <Col key={index} xs={24} md={12} xl={8}>
+                <Card className="h-full" loading />
+              </Col>
+            ))}
+          </Row>
+        ) : errorMessage ? (
+          <Card>
+            <Empty description={errorMessage}>
+              <Button type="primary" onClick={() => void fetchPromotions()}>
+                Tải lại
+              </Button>
+            </Empty>
+          </Card>
+        ) : promotions.length > 0 ? (
+          <Row gutter={[20, 20]}>
+            {promotions.map((promotion) => (
+              <Col key={promotion.id} xs={24} md={12} xl={8}>
+                <PromotionCard promotion={promotion} />
+              </Col>
+            ))}
+          </Row>
+        ) : (
+          <Card>
+            <Empty description="Hiện chưa có khuyến mãi công khai" />
+          </Card>
+        )}
 
-        {promotionMockData.length > PROMOTION_PAGE_SIZE ? (
+        {total > PROMOTION_PAGE_SIZE ? (
           <div className="promotion-pagination-bar mt-8">
             <div>
               <Typography.Text className="block !font-semibold !text-ink">
-                {promotionMockData.length} khuyến mãi
+                {total} khuyến mãi
               </Typography.Text>
               <Typography.Text className="!text-sm !text-slate-500">
-                Trang {page} trên {Math.ceil(promotionMockData.length / PROMOTION_PAGE_SIZE)}
+                Trang {page} trên {totalPages}
               </Typography.Text>
             </div>
             <AppPagination
               current={page}
               pageSize={PROMOTION_PAGE_SIZE}
-              total={promotionMockData.length}
+              total={total}
               showSizeChanger={false}
               showTotal={false}
               onChange={(nextPage) => setPage(nextPage)}
