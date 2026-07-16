@@ -39,6 +39,7 @@ export interface PublicCategoryOption {
 }
 
 export interface PublicServiceDetailRouteState {
+  bookingError?: string;
   date?: string;
   service?: PublicServiceCardModel;
   time?: string;

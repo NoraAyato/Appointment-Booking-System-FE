@@ -133,6 +133,18 @@ a {
   transition: transform 220ms ease;
 }
 
+.promotion-card-image-fallback {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: #2f7d67;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(47, 125, 103, 0.16), transparent 32%),
+    linear-gradient(135deg, #f7f4ee, #e8f3ec);
+  font-size: 54px;
+}
+
 .promotion-card:hover .promotion-card-image img {
   transform: scale(1.04);
 }
@@ -742,6 +754,620 @@ a {
 
 .service-detail-info-card {
   border-radius: 8px;
+}
+
+.appointment-confirm-page {
+  min-height: 72vh;
+}
+
+.appointment-confirm-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.appointment-confirm-breadcrumb {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.appointment-confirm-service-card,
+.appointment-confirm-staff-card,
+.appointment-confirm-summary-card {
+  border: 1px solid rgba(231, 226, 216, 0.92);
+  border-radius: 8px;
+  box-shadow: 0 18px 42px rgba(23, 34, 59, 0.06);
+}
+
+.appointment-confirm-gallery {
+  display: grid;
+  gap: 12px;
+}
+
+.appointment-confirm-image-wrap {
+  overflow: hidden;
+  min-height: 320px;
+  aspect-ratio: 16 / 7;
+  border-radius: 8px;
+  background: #edf4ef;
+}
+
+.appointment-confirm-image,
+.appointment-confirm-image .ant-image-img {
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  object-fit: cover;
+}
+
+.appointment-confirm-image-placeholder {
+  display: grid;
+  min-height: 320px;
+  place-items: center;
+  color: #2f7d67;
+  font-size: 34px;
+}
+
+.appointment-confirm-thumbnails {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.appointment-confirm-thumbnails button {
+  overflow: hidden;
+  height: 74px;
+  border: 1px solid #e7e2d8;
+  border-radius: 8px;
+  padding: 0;
+  background: #ffffff;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.appointment-confirm-thumbnails button:hover,
+.appointment-confirm-thumbnails button.active {
+  border-color: #2f7d67;
+  box-shadow: 0 10px 22px rgba(47, 125, 103, 0.14);
+  transform: translateY(-1px);
+}
+
+.appointment-confirm-thumbnails img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.appointment-confirm-image-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.appointment-confirm-service-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #eef2f7;
+  padding-bottom: 18px;
+}
+
+.appointment-confirm-service-price {
+  flex-shrink: 0;
+  min-width: 180px;
+  border: 1px solid #e7e2d8;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  text-align: right;
+}
+
+.appointment-confirm-service-price span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.appointment-confirm-service-price strong {
+  display: block;
+  margin-top: 4px;
+  color: #2f7d67;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.appointment-confirm-section-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.appointment-confirm-section-title>span,
+.appointment-confirm-section-title svg {
+  color: #2f7d67;
+  font-size: 24px;
+}
+
+.appointment-confirm-fact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.appointment-confirm-fact-grid div {
+  min-width: 0;
+  border: 1px solid #e7e2d8;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.appointment-confirm-fact-grid span {
+  display: block;
+  margin-bottom: 6px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.appointment-confirm-fact-grid strong {
+  display: block;
+  color: #17223b;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.appointment-confirm-service-description {
+  margin-top: 16px;
+  border: 1px solid #eef2f7;
+  border-radius: 8px;
+  padding: 14px;
+  background: #ffffff;
+}
+
+.appointment-confirm-staff-profile {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  border: 1px solid #e7e2d8;
+  border-radius: 8px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f4f7f2 100%);
+}
+
+.appointment-confirm-staff-meta,
+.appointment-confirm-staff-meta span {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.appointment-confirm-staff-meta svg {
+  color: #d99b2b;
+}
+
+.appointment-confirm-timeline {
+  display: grid;
+  gap: 12px;
+}
+
+.appointment-confirm-timeline>div {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid #e7e2d8;
+  border-radius: 8px;
+  padding: 14px;
+  background: #ffffff;
+}
+
+.appointment-confirm-timeline>div>span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 50%;
+  color: #64748b;
+  background: #f1f5f9;
+  font-weight: 800;
+}
+
+.appointment-confirm-timeline>div.active>span {
+  color: #ffffff;
+  background: #2f7d67;
+}
+
+.appointment-confirm-timeline strong {
+  display: block;
+  color: #17223b;
+}
+
+.appointment-confirm-timeline small {
+  display: block;
+  margin-top: 2px;
+  color: #64748b;
+}
+
+.appointment-confirm-summary-card {
+  position: sticky;
+  top: 96px;
+}
+
+.appointment-confirm-price-box {
+  border: 1px solid #e7e2d8;
+  border-radius: 8px;
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.appointment-confirm-detail-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  border-top: 1px solid #eef2f7;
+  padding-top: 18px;
+}
+
+.appointment-confirm-detail-list div {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.appointment-confirm-detail-list span {
+  color: #64748b;
+}
+
+.appointment-confirm-detail-list strong {
+  max-width: 62%;
+  color: #17223b;
+  text-align: right;
+}
+
+.invoice-checkout-page {
+  min-height: 72vh;
+}
+
+.invoice-checkout-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.invoice-checkout-breadcrumb {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.invoice-checkout-card {
+  border: 1px solid rgba(231, 226, 216, 0.92);
+  border-radius: 8px;
+  box-shadow: 0 18px 42px rgba(23, 34, 59, 0.06);
+}
+
+.invoice-checkout-overview-card .ant-card-body {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  background:
+    linear-gradient(135deg, rgba(237, 244, 239, 0.72), rgba(255, 255, 255, 0.96)),
+    #ffffff;
+}
+
+.invoice-checkout-overview-total {
+  display: grid;
+  min-width: 220px;
+  justify-items: end;
+  gap: 6px;
+  text-align: right;
+}
+
+.invoice-checkout-overview-total span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.invoice-checkout-overview-total strong {
+  color: #2f7d67;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.invoice-service-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+.invoice-service-image-wrap {
+  overflow: hidden;
+  min-height: 230px;
+  border-radius: 8px;
+  background: #edf4ef;
+}
+
+.invoice-service-image,
+.invoice-service-image .ant-image-img {
+  width: 100%;
+  height: 100%;
+  min-height: 230px;
+  object-fit: cover;
+}
+
+.invoice-service-image-placeholder {
+  display: grid;
+  min-height: 230px;
+  place-items: center;
+  color: #2f7d67;
+  font-size: 34px;
+}
+
+.invoice-service-fact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.invoice-service-fact-grid div,
+.invoice-note-box,
+.invoice-staff-box {
+  min-width: 0;
+  border: 1px solid #e7e2d8;
+  border-radius: 8px;
+  padding: 13px;
+  background: #f8fafc;
+}
+
+.invoice-service-fact-grid span {
+  display: block;
+  margin-bottom: 6px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.invoice-service-fact-grid strong {
+  display: block;
+  color: #17223b;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.invoice-section-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.invoice-section-title>span,
+.invoice-section-title svg {
+  color: #2f7d67;
+  font-size: 24px;
+}
+
+.invoice-staff-note-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.95fr) minmax(0, 1.05fr);
+  gap: 12px;
+}
+
+.invoice-staff-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.invoice-payment-method-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.invoice-payment-method {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 14px;
+  border: 1px solid #e7e2d8;
+  border-radius: 8px;
+  padding: 16px 42px 16px 16px;
+  color: #17223b;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.invoice-payment-method:hover,
+.invoice-payment-method.selected {
+  border-color: #2f7d67;
+  box-shadow: 0 14px 30px rgba(47, 125, 103, 0.13);
+  transform: translateY(-1px);
+}
+
+.invoice-payment-method.momo-method:hover,
+.invoice-payment-method.momo-method.selected {
+  border-color: #a50064;
+  box-shadow: 0 14px 30px rgba(165, 0, 100, 0.16);
+}
+
+.invoice-payment-method.selected {
+  background: #f8fafc;
+}
+
+.invoice-payment-method.momo-method.selected {
+  background: linear-gradient(135deg, rgba(255, 236, 247, 0.96), rgba(255, 255, 255, 0.98));
+}
+
+.invoice-payment-logo-frame {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 8px;
+  color: #2f7d67;
+  background: #edf4ef;
+  font-size: 22px;
+}
+
+.invoice-payment-method.momo-method .invoice-payment-logo-frame {
+  border: 1px solid rgba(165, 0, 100, 0.18);
+  background: #ffffff;
+}
+
+.invoice-momo-logo {
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.invoice-payment-method strong {
+  display: block;
+  margin-top: 1px;
+  color: #17223b;
+  font-size: 16px;
+}
+
+.invoice-payment-method small {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  line-height: 1.55;
+}
+
+.invoice-payment-check {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  color: #2f7d67;
+  font-size: 18px;
+}
+
+.invoice-payment-method.momo-method .invoice-payment-check {
+  color: #a50064;
+}
+
+.invoice-summary-card {
+  position: sticky;
+  top: 96px;
+}
+
+.invoice-promotion-box {
+  border: 1px solid #e7e2d8;
+  border-radius: 8px;
+  padding: 14px;
+  background: #f8fafc;
+}
+
+.invoice-promotion-applied {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  border: 1px solid rgba(47, 125, 103, 0.18);
+  border-radius: 8px;
+  padding: 10px;
+  color: #23594e;
+  background: #edf7f1;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.invoice-promotion-applied svg {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.invoice-summary-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.invoice-summary-heading>span,
+.invoice-summary-heading svg {
+  color: #2f7d67;
+  font-size: 24px;
+}
+
+.invoice-summary-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  border-top: 1px solid #eef2f7;
+  padding-top: 18px;
+}
+
+.invoice-summary-list div {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.invoice-summary-list span {
+  color: #64748b;
+}
+
+.invoice-summary-list strong {
+  max-width: 62%;
+  color: #17223b;
+  text-align: right;
+}
+
+.invoice-total-box {
+  margin: 20px 0;
+  border-radius: 8px;
+  padding: 18px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #214f45 0%, #2f7d67 100%);
+}
+
+.invoice-total-box span {
+  display: block;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.invoice-total-box strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 30px;
+  line-height: 1.1;
 }
 
 .service-detail-info-heading {
@@ -1878,6 +2504,23 @@ a {
     grid-template-columns: minmax(0, 1fr) 180px;
   }
 
+  .appointment-confirm-summary-card {
+    position: static;
+  }
+
+  .invoice-summary-card {
+    position: static;
+  }
+
+  .appointment-confirm-fact-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .invoice-service-layout,
+  .invoice-staff-note-grid {
+    grid-template-columns: 1fr;
+  }
+
   .staff-dashboard-filter-grid .ant-space,
   .staff-appointment-filter-grid .ant-space {
     grid-column: 1 / -1;
@@ -1934,6 +2577,60 @@ a {
 
   .staff-week-navigator-range {
     width: 100%;
+  }
+
+  .appointment-confirm-nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .invoice-checkout-nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .appointment-confirm-image-wrap,
+  .appointment-confirm-image,
+  .appointment-confirm-image .ant-image-img,
+  .appointment-confirm-image-placeholder {
+    min-height: 190px;
+  }
+
+  .appointment-confirm-fact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-service-fact-grid,
+  .invoice-payment-method-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-checkout-overview-card .ant-card-body {
+    flex-direction: column;
+  }
+
+  .appointment-confirm-staff-profile {
+    flex-direction: column;
+  }
+
+  .appointment-confirm-detail-list div {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .appointment-confirm-detail-list strong {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .invoice-summary-list div {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .invoice-summary-list strong {
+    max-width: 100%;
+    text-align: left;
   }
 
   .staff-dashboard-upcoming-list article {

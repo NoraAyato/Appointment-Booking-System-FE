@@ -1,8 +1,10 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Breadcrumb, Button, Card, Col, Empty, Row, Spin, notification } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 
+import { useAppSelector } from '@/app/redux/hooks';
+import { appointmentBookingApi } from '@/features/appointments/api/appointment-booking-api';
 import { publicReviewApi } from '@/features/public-reviews/api/public-review-api';
 import type {
   PublicServiceReviewModel,
@@ -20,18 +22,26 @@ import type {
   PublicServiceCardModel,
   PublicServiceDetailRouteState,
 } from '../types/public-service-type';
-import { parseBookingDate, parseBookingTime } from '../utils/public-service-time';
+import { getApiTimeValue, parseBookingDate, parseBookingTime } from '../utils/public-service-time';
 
 const PUBLIC_SERVICE_DETAIL_FALLBACK_LIMIT = 100;
 const SERVICE_REVIEW_PAGE_SIZE = 3;
+
+interface MainLayoutOutletContext {
+  openLogin?: () => void;
+}
 
 export function ServiceDetailPage() {
   const { serviceId } = useParams<{ serviceId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
+  const { openLogin } = useOutletContext<MainLayoutOutletContext>();
+  const user = useAppSelector((state) => state.users.currentUser);
   const [toast, toastContextHolder] = notification.useNotification();
   const routeState = location.state as PublicServiceDetailRouteState | null;
   const stateService = routeState?.service;
+  const bookingError = routeState?.bookingError;
+  const shownBookingErrorRef = useRef<string | null>(null);
   const initialService: PublicServiceCardModel | null =
     stateService && stateService.id === serviceId ? stateService : null;
   const initialDate = parseBookingDate(routeState?.date);
@@ -46,6 +56,19 @@ export function ServiceDetailPage() {
   const [reviewPage, setReviewPage] = useState(1);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsError, setReviewsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!bookingError || shownBookingErrorRef.current === bookingError) {
+      return;
+    }
+
+    shownBookingErrorRef.current = bookingError;
+    toast.warning({
+      message: 'Vui lòng chọn lại lịch hẹn',
+      description: bookingError,
+      placement: 'topRight',
+    });
+  }, [bookingError, toast]);
 
   useEffect(() => {
     if (!serviceId) {
@@ -167,21 +190,66 @@ export function ServiceDetailPage() {
     void fetchReviewData();
   }, [fetchReviewData]);
 
-  const handleBookService = () => {
+  const refreshBookingAvailability = useCallback(() => {
+    void fetchTimeSlotData();
+
+    if (date && time) {
+      void fetchStaffData();
+    }
+  }, [date, fetchStaffData, fetchTimeSlotData, time]);
+
+  const handleBookService = async () => {
     if (!service || !selectedStaff || !date || !time) {
+      return;
+    }
+
+    if (!user) {
+      openLogin?.();
+      toast.info({
+        message: 'Vui lòng đăng nhập để đặt lịch',
+        description: 'Bạn cần đăng nhập trước khi giữ lịch hẹn.',
+        placement: 'topRight',
+      });
+      return;
+    }
+
+    const apiTime = getApiTimeValue(time);
+
+    if (!apiTime) {
       return;
     }
 
     setBookingLoading(true);
 
-    window.setTimeout(() => {
-      setBookingLoading(false);
-      toast.success({
-        message: 'Đã ghi nhận lựa chọn dịch vụ',
-        description: `${service.name} với ${selectedStaff.name}, ${date.format('DD/MM/YYYY')} lúc ${time.format('HH:mm')}.`,
+    try {
+      const response = await appointmentBookingApi.holdSlot({
+        date: date.format('YYYY-MM-DD'),
+        serviceId: service.id,
+        staffId: selectedStaff.id,
+        time: apiTime,
+      });
+
+      if (!response.success) {
+        throw new Error(response.message || 'Không thể giữ lịch hẹn.');
+      }
+
+      navigate('/appointments/confirm', {
+        state: {
+          hold: response.data,
+          service,
+          staff: selectedStaff,
+        },
+      });
+    } catch (error) {
+      refreshBookingAvailability();
+      toast.error({
+        message: 'Không thể giữ lịch hẹn',
+        description: getApiErrorMessage(error, 'Vui lòng chọn lại khung giờ hoặc nhân viên.'),
         placement: 'topRight',
       });
-    }, 450);
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   if (loading) {

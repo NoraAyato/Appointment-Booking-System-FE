@@ -5,6 +5,7 @@ import { MainLayout } from '@/app/layouts/MainLayout';
 import { AboutPage } from '@/features/about/pages/AboutPage';
 import { GoogleCallbackPage } from '@/features/auth/pages/GoogleCallbackPage';
 import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage';
+import { AppointmentConfirmPage } from '@/features/appointments/pages/AppointmentConfirmPage';
 import { AppointmentHistoryPage } from '@/features/appointments/pages/AppointmentHistoryPage';
 import { AdminBlockedSlotsPage } from '@/features/admin-blocked-slots/pages/AdminBlockedSlotsPage';
 import { AdminCategoriesPage } from '@/features/admin-categories/pages/AdminCategoriesPage';
@@ -25,6 +26,7 @@ import { StaffDashboardPage } from '@/features/staff-dashboard/pages/StaffDashbo
 import { StaffLeaveRequestsPage } from '@/features/staff-leave-requests/pages/StaffLeaveRequestsPage';
 import { StaffShiftsPage } from '@/features/staff-shifts/pages/StaffShiftsPage';
 import { HomePage } from '@/features/home/pages/HomePage';
+import { InvoiceCheckoutPage } from '@/features/invoices/pages/InvoiceCheckoutPage';
 import { ProfilePage } from '@/features/profile/pages/ProfilePage';
 import { PromotionsPage } from '@/features/promotions/pages/PromotionsPage';
 import { ServiceDetailPage } from '@/features/public-services/pages/ServiceDetailPage';
@@ -83,6 +85,22 @@ export const router = createBrowserRouter([
             element: (
               <ProtectedRoute>
                 <AppointmentHistoryPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'appointments/confirm',
+            element: (
+              <ProtectedRoute>
+                <AppointmentConfirmPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'invoices/checkout',
+            element: (
+              <ProtectedRoute>
+                <InvoiceCheckoutPage />
               </ProtectedRoute>
             ),
           },
