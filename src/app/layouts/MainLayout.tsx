@@ -167,8 +167,7 @@ export function MainLayout() {
         </div>
 
         <div className="mx-auto mt-8 flex max-w-7xl flex-col gap-2 border-t border-white/10 pt-5 text-sm text-white/50 md:flex-row md:items-center md:justify-between">
-          <span>{APP_BRAND.name} appointment booking</span>
-          <span>Giao diện mock trước khi nối API dịch vụ thật.</span>
+          <span>{APP_BRAND.name}</span>
         </div>
       </Footer>
 
