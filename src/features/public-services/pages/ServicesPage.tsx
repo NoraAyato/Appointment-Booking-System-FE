@@ -14,7 +14,7 @@ import {
 } from 'antd';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { AppPagination } from '@/shared/components/AppPagination';
@@ -22,10 +22,16 @@ import { AppSelect } from '@/shared/components/AppSelect';
 import type { AppSelectOption } from '@/shared/components/AppSelect';
 import { getApiErrorMessage } from '@/shared/utils/api-error';
 
-import { publicServiceApi } from '../api/public-service-api';
 import { ServiceCard } from '../components/ServiceCard';
 import { DEFAULT_PUBLIC_SERVICE_PAGE_SIZE } from '../constants/public-service-options';
-import type { PublicServiceCardModel } from '../types/public-service-type';
+import {
+  usePublicServiceCategoriesQuery,
+  usePublicServicesQuery,
+} from '../hooks/usePublicServicesQuery';
+import type {
+  PublicServiceCardModel,
+  PublicServiceFilterParams,
+} from '../types/public-service-type';
 import { isDateBeforeToday } from '../utils/public-service-time';
 
 interface ServiceFilterValues {
@@ -38,85 +44,73 @@ export function ServicesPage() {
   const [form] = Form.useForm<ServiceFilterValues>();
   const navigate = useNavigate();
   const [toast, toastContextHolder] = notification.useNotification();
-  const [services, setServices] = useState<PublicServiceCardModel[]>([]);
-  const [total, setTotal] = useState(0);
   const [filters, setFilters] = useState<ServiceFilterValues>({
     date: dayjs(),
   });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PUBLIC_SERVICE_PAGE_SIZE);
-  const [loading, setLoading] = useState(false);
-  const [categoryLoading, setCategoryLoading] = useState(false);
-  const [categoryOptions, setCategoryOptions] = useState<Array<AppSelectOption<string>>>([]);
 
-  useEffect(() => {
-    const fetchCategoryOptions = async () => {
-      setCategoryLoading(true);
+  const serviceQueryParams = useMemo<PublicServiceFilterParams>(
+    () => ({
+      categoryId: filters.categoryId,
+      date: filters.date?.format('YYYY-MM-DD'),
+      keyWord: filters.keyword?.trim() || undefined,
+      limit: pageSize,
+      page,
+    }),
+    [filters.categoryId, filters.date, filters.keyword, page, pageSize],
+  );
 
-      try {
-        const response = await publicServiceApi.getCategories();
+  const {
+    data: servicePage,
+    error: servicesError,
+    errorUpdatedAt: servicesErrorUpdatedAt,
+    isFetching: servicesFetching,
+    isLoading: servicesLoading,
+  } = usePublicServicesQuery(serviceQueryParams);
 
-        if (!response.success) {
-          throw new Error(response.message || 'Không thể tải danh mục.');
-        }
+  const {
+    data: categories = [],
+    error: categoryError,
+    errorUpdatedAt: categoryErrorUpdatedAt,
+    isLoading: categoryLoading,
+  } = usePublicServiceCategoriesQuery();
 
-        setCategoryOptions(
-          response.data.map((category) => ({
-            label: category.name,
-            value: category.id,
-          })),
-        );
-      } catch (fetchError) {
-        toast.error({
-          message: 'Không thể tải danh mục',
-          description: getApiErrorMessage(fetchError, 'Vui lòng thử lại sau.'),
-          placement: 'topRight',
-        });
-      } finally {
-        setCategoryLoading(false);
-      }
-    };
-
-    void fetchCategoryOptions();
-  }, [toast]);
-
-  const fetchServices = useCallback(
-    async (nextFilters: ServiceFilterValues, nextPage: number, nextLimit: number) => {
-      setLoading(true);
-
-      try {
-        const response = await publicServiceApi.getAll({
-          categoryId: nextFilters.categoryId,
-          date: nextFilters.date?.format('YYYY-MM-DD'),
-          keyWord: nextFilters.keyword?.trim() || undefined,
-          limit: nextLimit,
-          page: nextPage,
-        });
-
-        if (!response.success) {
-          throw new Error(response.message || 'Không thể tải dịch vụ.');
-        }
-
-        setServices(response.data.items);
-        setTotal(response.data.total);
-      } catch (fetchError) {
-        setServices([]);
-        setTotal(0);
-        toast.error({
-          message: 'Không thể tải dịch vụ',
-          description: getApiErrorMessage(fetchError, 'Vui lòng thử lại sau.'),
-          placement: 'topRight',
-        });
-      } finally {
-        setLoading(false);
-      }
-    },
-    [toast],
+  const categoryOptions = useMemo<Array<AppSelectOption<string>>>(
+    () =>
+      categories.map((category) => ({
+        label: category.name,
+        value: category.id,
+      })),
+    [categories],
   );
 
   useEffect(() => {
-    void fetchServices(filters, page, pageSize);
-  }, [fetchServices, filters, page, pageSize]);
+    if (!categoryError) {
+      return;
+    }
+
+    toast.error({
+      description: getApiErrorMessage(categoryError, 'Vui lòng thử lại sau.'),
+      message: 'Không thể tải danh mục',
+      placement: 'topRight',
+    });
+  }, [categoryError, categoryErrorUpdatedAt, toast]);
+
+  useEffect(() => {
+    if (!servicesError) {
+      return;
+    }
+
+    toast.error({
+      description: getApiErrorMessage(servicesError, 'Vui lòng thử lại sau.'),
+      message: 'Không thể tải dịch vụ',
+      placement: 'topRight',
+    });
+  }, [servicesError, servicesErrorUpdatedAt, toast]);
+
+  const services = servicePage?.items ?? [];
+  const total = servicePage?.total ?? 0;
 
   const handleFilter = (values: ServiceFilterValues) => {
     setFilters(values);
@@ -156,8 +150,8 @@ export function ServicesPage() {
               Chọn dịch vụ tại trung tâm phù hợp với lịch của bạn
             </Typography.Title>
             <Typography.Paragraph className="max-w-2xl !text-lg !leading-8 !text-slate-600">
-              Lọc theo ngày mong muốn, xem đầy đủ thông tin dịch vụ của HomeFeel và chọn trải nghiệm
-              chăm sóc phù hợp tại trung tâm.
+              Lọc theo ngày mong muốn, xem đầy đủ thông tin dịch vụ của HomeFeel và chọn trải
+              nghiệm chăm sóc phù hợp tại trung tâm.
             </Typography.Paragraph>
           </div>
         </div>
@@ -199,7 +193,13 @@ export function ServicesPage() {
               </div>
               <div>
                 <Space className="service-filter-actions mb-6 w-full" size={10}>
-                  <Button block type="primary" htmlType="submit" icon={<SearchOutlined />}>
+                  <Button
+                    block
+                    type="primary"
+                    htmlType="submit"
+                    icon={<SearchOutlined />}
+                    loading={servicesFetching}
+                  >
                     Lọc
                   </Button>
                   <Button icon={<ReloadOutlined />} onClick={handleReset} />
@@ -223,7 +223,7 @@ export function ServicesPage() {
           </Typography.Text>
         </div>
 
-        {loading ? (
+        {servicesLoading ? (
           <Row gutter={[20, 20]}>
             {Array.from({ length: pageSize }).map((_, index) => (
               <Col key={index} xs={24} md={12} xl={8}>

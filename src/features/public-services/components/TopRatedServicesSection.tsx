@@ -1,12 +1,11 @@
 import { CalendarOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Empty, Row, Typography } from 'antd';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
 import { getApiErrorMessage } from '@/shared/utils/api-error';
 
-import { publicServiceApi } from '../api/public-service-api';
-import type { PublicServiceCardModel } from '../types/public-service-type';
+import { useTopRatedServicesQuery } from '../hooks/usePublicServicesQuery';
 import { ServiceCard } from './ServiceCard';
 
 const getResponsiveSpan = (total: number) => {
@@ -31,35 +30,15 @@ const getResponsiveSpan = (total: number) => {
 };
 
 export function TopRatedServicesSection() {
-  const [services, setServices] = useState<PublicServiceCardModel[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchTopRatedServices = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await publicServiceApi.getTopRated();
-
-      if (!response.success) {
-        throw new Error(response.message || 'Không thể tải dịch vụ nổi bật.');
-      }
-
-      setServices(response.data);
-    } catch (fetchError) {
-      setServices([]);
-      setError(getApiErrorMessage(fetchError, 'Vui lòng thử lại sau.'));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void fetchTopRatedServices();
-  }, [fetchTopRatedServices]);
-
+  const {
+    data: services = [],
+    error,
+    isError,
+    isLoading,
+    refetch,
+  } = useTopRatedServicesQuery();
   const responsiveSpan = useMemo(() => getResponsiveSpan(services.length), [services.length]);
+  const errorMessage = isError ? getApiErrorMessage(error, 'Vui lòng thử lại sau.') : null;
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 md:px-8">
@@ -80,7 +59,7 @@ export function TopRatedServicesSection() {
         </Link>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <Row gutter={[20, 20]}>
           {Array.from({ length: 3 }).map((_, index) => (
             <Col key={index} xs={24} md={12} xl={8}>
@@ -88,10 +67,10 @@ export function TopRatedServicesSection() {
             </Col>
           ))}
         </Row>
-      ) : error ? (
+      ) : errorMessage ? (
         <Card>
-          <Empty description={error}>
-            <Button icon={<ReloadOutlined />} onClick={() => void fetchTopRatedServices()}>
+          <Empty description={errorMessage}>
+            <Button icon={<ReloadOutlined />} onClick={() => void refetch()}>
               Tải lại
             </Button>
           </Empty>

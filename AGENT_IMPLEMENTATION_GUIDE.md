@@ -978,3 +978,41 @@ cookie thĂ¬ xĂ³a cÆ¡ cháº¿ token hiá»‡n táº¡i sáº½ lĂ m to�
 - [ ] KhĂ´ng sá»­a file ngoĂ i pháº¡m vi yĂªu cáº§u.
 - [ ] `npm.cmd run lint` Ä‘áº¡t.
 - [ ] `npm.cmd run build` Ä‘áº¡t.
+
+## TanStack Query cho server-state/cache
+
+Áp dụng TanStack Query cho dữ liệu lấy từ server bằng `GET` khi dữ liệu đó có thể cache, refetch,
+giữ dữ liệu cũ khi đổi filter/page hoặc được dùng lại giữa nhiều component/page.
+
+Quy tắc tổ chức:
+
+- Query client đặt ở `src/shared/lib/query-client.ts` và được inject một lần trong `AppProvider`.
+- API function vẫn nằm trong `features/<feature>/api`; query hook không được gọi thẳng `axiosClient`.
+- Query key đặt trong `features/<feature>/constants/<feature>-query-keys.ts`.
+- Query hook đặt trong `features/<feature>/hooks/use<Feature>Query.ts`.
+- Page chỉ giữ UI state như filter, page, selected item; dữ liệu server lấy qua query hook.
+- Response `ApiResponse<T>` nên được unwrap trong hook bằng shared util trước khi trả `data` cho page.
+- Dùng `placeholderData: keepPreviousData` cho list có pagination/filter để UX không bị giật khi đổi trang.
+- Redux không dùng để cache server data từng page. Redux chỉ dùng cho global state thật sự cần chia sẻ,
+  ví dụ current user/session.
+- Mutation `POST`, `PUT`, `PATCH`, `DELETE` sau này nên dùng `useMutation` và invalidate đúng query key
+  liên quan thay vì reload toàn bộ page.
+
+Ví dụ flow đúng:
+
+```text
+Page filter/page state
+-> feature query hook
+-> feature API layer
+-> axiosClient
+-> unwrap ApiResponse
+-> page render loading/empty/error/data
+```
+
+Không làm:
+
+```text
+Page useEffect
+-> axiosClient trực tiếp
+-> setLoading/setData lặp lại ở nhiều page
+```

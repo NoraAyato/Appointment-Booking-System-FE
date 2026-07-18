@@ -1,30 +1,28 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Breadcrumb, Button, Card, Col, Empty, Row, Spin, notification } from 'antd';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 
 import { useAppSelector } from '@/app/redux/hooks';
 import { appointmentBookingApi } from '@/features/appointments/api/appointment-booking-api';
-import { publicReviewApi } from '@/features/public-reviews/api/public-review-api';
-import type {
-  PublicServiceReviewModel,
-  PublicServiceReviewStats,
-} from '@/features/public-reviews/types/public-review-type';
+import {
+  useServiceReviewsQuery,
+  useServiceReviewStatsQuery,
+} from '@/features/public-reviews/hooks/usePublicReviewsQuery';
 import { getApiErrorMessage } from '@/shared/utils/api-error';
 
-import { publicServiceApi } from '../api/public-service-api';
 import { ServiceBookingPanel } from '../components/ServiceBookingPanel';
 import { ServiceDetailGallery } from '../components/ServiceDetailGallery';
 import { ServiceDetailInfo } from '../components/ServiceDetailInfo';
 import { ServiceReviewSection } from '../components/ServiceReviewSection';
 import { useServiceDetailBooking } from '../hooks/useServiceDetailBooking';
+import { usePublicServiceDetailQuery } from '../hooks/usePublicServicesQuery';
 import type {
   PublicServiceCardModel,
   PublicServiceDetailRouteState,
 } from '../types/public-service-type';
 import { getApiTimeValue, parseBookingDate, parseBookingTime } from '../utils/public-service-time';
 
-const PUBLIC_SERVICE_DETAIL_FALLBACK_LIMIT = 100;
 const SERVICE_REVIEW_PAGE_SIZE = 3;
 
 interface MainLayoutOutletContext {
@@ -46,16 +44,16 @@ export function ServiceDetailPage() {
     stateService && stateService.id === serviceId ? stateService : null;
   const initialDate = parseBookingDate(routeState?.date);
   const initialTime = parseBookingTime(routeState?.time);
-
-  const [service, setService] = useState<PublicServiceCardModel | null>(initialService);
-  const [loading, setLoading] = useState(!service);
   const [bookingLoading, setBookingLoading] = useState(false);
-  const [reviews, setReviews] = useState<PublicServiceReviewModel[]>([]);
-  const [reviewStats, setReviewStats] = useState<PublicServiceReviewStats | null>(null);
-  const [reviewTotal, setReviewTotal] = useState(0);
   const [reviewPage, setReviewPage] = useState(1);
-  const [reviewsLoading, setReviewsLoading] = useState(false);
-  const [reviewsError, setReviewsError] = useState<string | null>(null);
+
+  const {
+    data: serviceData,
+    error: serviceError,
+    errorUpdatedAt: serviceErrorUpdatedAt,
+    isLoading: serviceLoading,
+  } = usePublicServiceDetailQuery(serviceId, initialService);
+  const service = serviceData ?? null;
 
   useEffect(() => {
     if (!bookingError || shownBookingErrorRef.current === bookingError) {
@@ -64,53 +62,23 @@ export function ServiceDetailPage() {
 
     shownBookingErrorRef.current = bookingError;
     toast.warning({
-      message: 'Vui lòng chọn lại lịch hẹn',
       description: bookingError,
+      message: 'Vui lòng chọn lại lịch hẹn',
       placement: 'topRight',
     });
   }, [bookingError, toast]);
 
   useEffect(() => {
-    if (!serviceId) {
-      setService(null);
-      setLoading(false);
+    if (!serviceError) {
       return;
     }
 
-    if (stateService?.id === serviceId) {
-      setService(stateService);
-      setLoading(false);
-      return;
-    }
-
-    const fetchService = async () => {
-      setLoading(true);
-
-      try {
-        const response = await publicServiceApi.getAll({
-          limit: PUBLIC_SERVICE_DETAIL_FALLBACK_LIMIT,
-          page: 1,
-        });
-
-        if (!response.success) {
-          throw new Error(response.message || 'Không thể tải thông tin dịch vụ.');
-        }
-
-        setService(response.data.items.find((item) => item.id === serviceId) ?? null);
-      } catch (fetchError) {
-        setService(null);
-        toast.error({
-          message: 'Không thể tải chi tiết dịch vụ',
-          description: getApiErrorMessage(fetchError, 'Vui lòng thử lại sau.'),
-          placement: 'topRight',
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void fetchService();
-  }, [serviceId, stateService, toast]);
+    toast.error({
+      description: getApiErrorMessage(serviceError, 'Vui lòng thử lại sau.'),
+      message: 'Không thể tải chi tiết dịch vụ',
+      placement: 'topRight',
+    });
+  }, [serviceError, serviceErrorUpdatedAt, toast]);
 
   const {
     date,
@@ -135,60 +103,27 @@ export function ServiceDetailPage() {
   });
 
   const reviewServiceId = service?.id;
+  const reviewQueryParams = useMemo(
+    () => ({
+      limit: SERVICE_REVIEW_PAGE_SIZE,
+      page: reviewPage,
+      serviceId: reviewServiceId ?? '',
+    }),
+    [reviewPage, reviewServiceId],
+  );
+  const reviewStatsQuery = useServiceReviewStatsQuery(reviewServiceId);
+  const reviewsQuery = useServiceReviewsQuery(reviewQueryParams, Boolean(reviewServiceId));
 
   useEffect(() => {
     setReviewPage(1);
-    setReviews([]);
-    setReviewStats(null);
-    setReviewTotal(0);
-    setReviewsError(null);
   }, [reviewServiceId]);
 
-  const fetchReviewData = useCallback(async () => {
-    if (!reviewServiceId) {
-      setReviews([]);
-      setReviewStats(null);
-      setReviewTotal(0);
-      return;
-    }
-
-    setReviewsLoading(true);
-    setReviewsError(null);
-
-    try {
-      const [statsResponse, reviewsResponse] = await Promise.all([
-        publicReviewApi.getServiceStats(reviewServiceId),
-        publicReviewApi.getServiceReviews({
-          limit: SERVICE_REVIEW_PAGE_SIZE,
-          page: reviewPage,
-          serviceId: reviewServiceId,
-        }),
-      ]);
-
-      if (!statsResponse.success) {
-        throw new Error(statsResponse.message || 'Không thể tải thống kê đánh giá.');
-      }
-
-      if (!reviewsResponse.success) {
-        throw new Error(reviewsResponse.message || 'Không thể tải danh sách đánh giá.');
-      }
-
-      setReviewStats(statsResponse.data);
-      setReviews(reviewsResponse.data.items);
-      setReviewTotal(reviewsResponse.data.total);
-    } catch (fetchError) {
-      setReviewStats(null);
-      setReviews([]);
-      setReviewTotal(0);
-      setReviewsError(getApiErrorMessage(fetchError, 'Vui lòng thử lại sau.'));
-    } finally {
-      setReviewsLoading(false);
-    }
-  }, [reviewPage, reviewServiceId]);
-
-  useEffect(() => {
-    void fetchReviewData();
-  }, [fetchReviewData]);
+  const reviewError = reviewStatsQuery.error ?? reviewsQuery.error;
+  const reviewErrorMessage = reviewError ? getApiErrorMessage(reviewError, 'Vui lòng thử lại sau.') : null;
+  const reviews = reviewsQuery.data?.items ?? [];
+  const reviewStats = reviewStatsQuery.data ?? null;
+  const reviewTotal = reviewsQuery.data?.total ?? 0;
+  const reviewsLoading = reviewStatsQuery.isLoading || reviewsQuery.isLoading;
 
   const refreshBookingAvailability = useCallback(() => {
     void fetchTimeSlotData();
@@ -198,6 +133,11 @@ export function ServiceDetailPage() {
     }
   }, [date, fetchStaffData, fetchTimeSlotData, time]);
 
+  const handleReviewRetry = () => {
+    void reviewStatsQuery.refetch();
+    void reviewsQuery.refetch();
+  };
+
   const handleBookService = async () => {
     if (!service || !selectedStaff || !date || !time) {
       return;
@@ -206,8 +146,8 @@ export function ServiceDetailPage() {
     if (!user) {
       openLogin?.();
       toast.info({
-        message: 'Vui lòng đăng nhập để đặt lịch',
         description: 'Bạn cần đăng nhập trước khi giữ lịch hẹn.',
+        message: 'Vui lòng đăng nhập để đặt lịch',
         placement: 'topRight',
       });
       return;
@@ -243,8 +183,8 @@ export function ServiceDetailPage() {
     } catch (error) {
       refreshBookingAvailability();
       toast.error({
-        message: 'Không thể giữ lịch hẹn',
         description: getApiErrorMessage(error, 'Vui lòng chọn lại khung giờ hoặc nhân viên.'),
+        message: 'Không thể giữ lịch hẹn',
         placement: 'topRight',
       });
     } finally {
@@ -252,7 +192,7 @@ export function ServiceDetailPage() {
     }
   };
 
-  if (loading) {
+  if (serviceLoading) {
     return (
       <main className="grid min-h-[520px] place-items-center bg-[#f7f4ee]">
         {toastContextHolder}
@@ -291,11 +231,7 @@ export function ServiceDetailPage() {
             ]}
           />
 
-          <Button
-            className="mb-5"
-            icon={<ArrowLeftOutlined />}
-            onClick={() => navigate('/services')}
-          >
+          <Button className="mb-5" icon={<ArrowLeftOutlined />} onClick={() => navigate('/services')}>
             Quay lại dịch vụ
           </Button>
 
@@ -309,10 +245,10 @@ export function ServiceDetailPage() {
                 <ServiceDetailInfo service={service} />
                 <ServiceReviewSection
                   currentPage={reviewPage}
-                  error={reviewsError}
+                  error={reviewErrorMessage}
                   loading={reviewsLoading}
                   onPageChange={(nextPage) => setReviewPage(nextPage)}
-                  onRetry={() => void fetchReviewData()}
+                  onRetry={handleReviewRetry}
                   pageSize={SERVICE_REVIEW_PAGE_SIZE}
                   reviews={reviews}
                   service={service}

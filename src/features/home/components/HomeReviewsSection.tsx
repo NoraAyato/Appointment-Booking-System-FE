@@ -1,9 +1,8 @@
 import { ReloadOutlined } from '@ant-design/icons';
 import { Avatar, Button, Card, Col, Empty, Rate, Row, Typography } from 'antd';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
-import { publicReviewApi } from '@/features/public-reviews/api/public-review-api';
-import type { PublicTopRatedReviewModel } from '@/features/public-reviews/types/public-review-type';
+import { useTopRatedReviewsQuery } from '@/features/public-reviews/hooks/usePublicReviewsQuery';
 import { getApiErrorMessage } from '@/shared/utils/api-error';
 import { getAvatarInitial } from '@/shared/utils/avatar';
 import { formatDate } from '@/shared/utils/date-format';
@@ -30,33 +29,13 @@ const getResponsiveSpan = (total: number) => {
 };
 
 export function HomeReviewsSection() {
-  const [reviews, setReviews] = useState<PublicTopRatedReviewModel[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchTopRatedReviews = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await publicReviewApi.getTopRated();
-
-      if (!response.success) {
-        throw new Error(response.message || 'Không thể tải đánh giá nổi bật.');
-      }
-
-      setReviews(response.data);
-    } catch (fetchError) {
-      setReviews([]);
-      setError(getApiErrorMessage(fetchError, 'Vui lòng thử lại sau.'));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void fetchTopRatedReviews();
-  }, [fetchTopRatedReviews]);
+  const {
+    data: reviews = [],
+    error,
+    isError,
+    isLoading,
+    refetch,
+  } = useTopRatedReviewsQuery();
 
   const averageRating = useMemo(() => {
     if (!reviews.length) {
@@ -66,6 +45,7 @@ export function HomeReviewsSection() {
     return reviews.reduce((total, review) => total + review.rating, 0) / reviews.length;
   }, [reviews]);
   const responsiveSpan = useMemo(() => getResponsiveSpan(reviews.length), [reviews.length]);
+  const errorMessage = isError ? getApiErrorMessage(error, 'Vui lòng thử lại sau.') : null;
 
   return (
     <section className="home-review-section">
@@ -88,7 +68,7 @@ export function HomeReviewsSection() {
           </div>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <Row gutter={[20, 20]}>
             {Array.from({ length: 3 }).map((_, index) => (
               <Col key={index} xs={24} md={12} xl={8}>
@@ -96,10 +76,10 @@ export function HomeReviewsSection() {
               </Col>
             ))}
           </Row>
-        ) : error ? (
+        ) : errorMessage ? (
           <Card>
-            <Empty description={error}>
-              <Button icon={<ReloadOutlined />} onClick={() => void fetchTopRatedReviews()}>
+            <Empty description={errorMessage}>
+              <Button icon={<ReloadOutlined />} onClick={() => void refetch()}>
                 Tải lại
               </Button>
             </Empty>
