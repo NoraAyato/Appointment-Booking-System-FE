@@ -111,7 +111,7 @@ src/
 
 ## Quy Ước Kiến Trúc
 
-Các thay đổi mới nên bám theo `AGENT_IMPLEMENTATION_GUIDE.md`.
+Các thay đổi mới nên bám theo quy ước kiến trúc trong README này.
 
 - Page/component không gọi Axios trực tiếp. API call phải nằm trong `features/<feature>/api`.
 - Type request/response/payload đặt trong `features/<feature>/types`.
@@ -258,9 +258,6 @@ npm run g <name> # Generate skeleton feature
 
 ## Tài Liệu Nội Bộ
 
-- `AGENT_IMPLEMENTATION_GUIDE.md`: quy tắc tổ chức code và flow triển khai.
-- `FE_FLOW_ANALYSIS.md`: phân tích flow frontend chi tiết.
-- `PROJECT_CONTEXT.md`: bối cảnh dự án qua các giai đoạn.
 - `TASK_LOG.md`: lịch sử các nhóm việc đã triển khai.
 
 ## Trạng Thái Chất Lượng
