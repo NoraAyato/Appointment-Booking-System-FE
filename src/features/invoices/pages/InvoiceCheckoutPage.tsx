@@ -25,6 +25,8 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import momoLogo from '@/assets/payment/momo-logo.svg';
+import { paymentApi } from '@/features/payments/api/payment-api';
+import { savePendingMomoPayment } from '@/features/payments/utils/payment-session';
 import { getApiErrorMessage } from '@/shared/utils/api-error';
 import { getAssetUrl } from '@/shared/utils/asset-url';
 import { formatDate, formatDateTime, formatTimeRange } from '@/shared/utils/date-format';
@@ -114,14 +116,21 @@ export function InvoiceCheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<InvoicePaymentMethod>('MOMO');
   const [promotionCodeInput, setPromotionCodeInput] = useState('');
   const [promotionApplying, setPromotionApplying] = useState(false);
+  const [paymentCreating, setPaymentCreating] = useState(false);
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
   const routeState = location.state as InvoiceCheckoutRouteState | null;
   const invoiceId = searchParams.get('invoiceId') ?? routeState?.invoiceId ?? '';
   const hasAppliedPromotion = Boolean(
-    invoice?.promotionCode?.trim() && invoice.discountValue !== null && invoice.discountValue !== undefined,
+    invoice?.promotionCode?.trim() &&
+      invoice.discountValue !== null &&
+      invoice.discountValue !== undefined,
   );
+  const selectedPaymentOption = invoicePaymentMethodOptions.find(
+    (method) => method.value === paymentMethod,
+  );
+  const isSelectedPaymentMethodDisabled = Boolean(selectedPaymentOption?.disabled);
 
   useEffect(() => {
     if (!invoiceId) {
@@ -205,13 +214,52 @@ export function InvoiceCheckoutPage() {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    if (!invoice) {
+      return;
+    }
+
+    if (invoice.invoiceStatus === 'PAID') {
+      navigate(`/payment/result?invoiceId=${encodeURIComponent(invoice.invoiceId)}`);
+      return;
+    }
+
+    if (isSelectedPaymentMethodDisabled) {
+      toast.warning({
+        message: 'Phương thức thanh toán chưa hỗ trợ',
+        description: 'Vui lòng chọn MoMo để tiếp tục thanh toán.',
+        placement: 'topRight',
+      });
+      return;
+    }
+
+    if (paymentMethod === 'MOMO') {
+      setPaymentCreating(true);
+
+      try {
+        const response = await paymentApi.createMomoPayment(invoice.invoiceId);
+
+        if (!response.success || !response.data.payUrl) {
+          throw new Error(response.message || 'Không thể tạo thanh toán MoMo.');
+        }
+
+        savePendingMomoPayment(response.data);
+        window.location.assign(response.data.payUrl);
+      } catch (error) {
+        toast.error({
+          message: 'Không thể tạo thanh toán MoMo',
+          description: getApiErrorMessage(error, 'Vui lòng thử lại sau.'),
+          placement: 'topRight',
+        });
+        setPaymentCreating(false);
+      }
+
+      return;
+    }
+
     toast.success({
-      message: paymentMethod === 'MOMO' ? 'Sẵn sàng chuyển sang MoMo' : 'Đã ghi nhận thanh toán tại chỗ',
-      description:
-        paymentMethod === 'MOMO'
-          ? 'Cổng thanh toán thật sẽ được nối ở bước tiếp theo.'
-          : 'Hóa đơn sẽ được thanh toán tại trung tâm khi bạn đến sử dụng dịch vụ.',
+      message: 'Đã ghi nhận thanh toán tại chỗ',
+      description: 'Hóa đơn sẽ được thanh toán tại trung tâm khi bạn đến sử dụng dịch vụ.',
       placement: 'topRight',
     });
     navigate('/booking-history');
@@ -423,6 +471,7 @@ export function InvoiceCheckoutPage() {
                       'invoice-payment-method',
                       method.value === 'MOMO' ? 'momo-method' : 'cash-method',
                       isSelected ? 'selected' : '',
+                      method.disabled ? 'disabled' : '',
                     ]
                       .filter(Boolean)
                       .join(' ');
@@ -430,15 +479,27 @@ export function InvoiceCheckoutPage() {
                     return (
                       <button
                         className={methodClassName}
+                        disabled={method.disabled}
                         key={method.value}
-                        onClick={() => setPaymentMethod(method.value)}
+                        onClick={() => {
+                          if (!method.disabled) {
+                            setPaymentMethod(method.value);
+                          }
+                        }}
                         type="button"
                       >
                         <span className="invoice-payment-logo-frame">
                           {getPaymentIcon(method.value)}
                         </span>
                         <div>
-                          <strong>{method.label}</strong>
+                          <strong>
+                            {method.label}
+                            {method.disabled ? (
+                              <Tag className="ml-2 !m-0" color="default">
+                                Chưa hỗ trợ
+                              </Tag>
+                            ) : null}
+                          </strong>
                           <small>{method.description}</small>
                         </div>
                         {isSelected ? <CheckCircleOutlined className="invoice-payment-check" /> : null}
@@ -490,7 +551,8 @@ export function InvoiceCheckoutPage() {
                   <div className="invoice-promotion-applied">
                     <CheckCircleOutlined />
                     <span>
-                      Mã {appliedPromotionCode} đã được áp dụng, giảm {formatCurrency(invoice.discountValue)}.
+                      Mã {appliedPromotionCode} đã được áp dụng, giảm{' '}
+                      {formatCurrency(invoice.discountValue)}.
                     </span>
                   </div>
                 ) : null}
@@ -525,7 +587,14 @@ export function InvoiceCheckoutPage() {
                 <strong>{payableAmount}</strong>
               </div>
 
-              <Button block size="large" type="primary" onClick={handleContinue}>
+              <Button
+                block
+                disabled={isSelectedPaymentMethodDisabled}
+                loading={paymentCreating}
+                size="large"
+                type="primary"
+                onClick={() => void handleContinue()}
+              >
                 Tiếp tục
               </Button>
             </Card>

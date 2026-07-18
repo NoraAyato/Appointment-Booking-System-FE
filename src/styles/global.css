@@ -1226,6 +1226,20 @@ a {
   background: linear-gradient(135deg, rgba(255, 236, 247, 0.96), rgba(255, 255, 255, 0.98));
 }
 
+.invoice-payment-method.disabled,
+.invoice-payment-method:disabled {
+  opacity: 0.62;
+  background: #f8fafc;
+  cursor: not-allowed;
+}
+
+.invoice-payment-method.disabled:hover,
+.invoice-payment-method:disabled:hover {
+  border-color: #e7e2d8;
+  box-shadow: none;
+  transform: none;
+}
+
 .invoice-payment-logo-frame {
   display: grid;
   width: 48px;
@@ -1368,6 +1382,32 @@ a {
   margin-top: 6px;
   font-size: 30px;
   line-height: 1.1;
+}
+
+.payment-result-page {
+  min-height: 72vh;
+}
+
+.payment-result-card {
+  border: 1px solid rgba(231, 226, 216, 0.92);
+  border-radius: 8px;
+  box-shadow: 0 18px 42px rgba(23, 34, 59, 0.06);
+}
+
+.payment-result-status-icon {
+  font-size: 72px;
+}
+
+.payment-result-status-icon.paid {
+  color: #2f7d67;
+}
+
+.payment-result-status-icon.pending {
+  color: #d99b2b;
+}
+
+.payment-result-status-icon.failed {
+  color: #dc2626;
 }
 
 .service-detail-info-heading {

@@ -27,6 +27,7 @@ import { StaffLeaveRequestsPage } from '@/features/staff-leave-requests/pages/St
 import { StaffShiftsPage } from '@/features/staff-shifts/pages/StaffShiftsPage';
 import { HomePage } from '@/features/home/pages/HomePage';
 import { InvoiceCheckoutPage } from '@/features/invoices/pages/InvoiceCheckoutPage';
+import { PaymentResultPage } from '@/features/payments/pages/PaymentResultPage';
 import { ProfilePage } from '@/features/profile/pages/ProfilePage';
 import { PromotionsPage } from '@/features/promotions/pages/PromotionsPage';
 import { ServiceDetailPage } from '@/features/public-services/pages/ServiceDetailPage';
@@ -101,6 +102,14 @@ export const router = createBrowserRouter([
             element: (
               <ProtectedRoute>
                 <InvoiceCheckoutPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'payment/result',
+            element: (
+              <ProtectedRoute>
+                <PaymentResultPage />
               </ProtectedRoute>
             ),
           },

@@ -6,6 +6,7 @@ export interface InvoiceCheckoutRouteState {
 
 export interface InvoicePaymentMethodOption {
   description: string;
+  disabled?: boolean;
   label: string;
   value: InvoicePaymentMethod;
 }

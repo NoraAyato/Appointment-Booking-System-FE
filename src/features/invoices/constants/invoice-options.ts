@@ -7,7 +7,8 @@ export const invoicePaymentMethodOptions: InvoicePaymentMethodOption[] = [
     value: 'MOMO',
   },
   {
-    description: 'Thanh toán trực tiếp tại trung tâm sau khi hoàn thành dịch vụ.',
+    description: 'Phương thức này chưa được hỗ trợ trong phiên bản hiện tại.',
+    disabled: true,
     label: 'Tiền mặt tại chỗ',
     value: 'CASH',
   },
