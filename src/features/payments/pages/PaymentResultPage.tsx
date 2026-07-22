@@ -2,7 +2,6 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   CloseCircleOutlined,
-  ReloadOutlined,
 } from '@ant-design/icons';
 import { Alert, Button, Card, Empty, Result, Space, Spin, Typography } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -66,7 +65,6 @@ export function PaymentResultPage() {
   );
   const [payment, setPayment] = useState<PaymentDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const fetchPaymentStatus = useCallback(
@@ -78,9 +76,7 @@ export function PaymentResultPage() {
         return;
       }
 
-      if (silent) {
-        setRefreshing(true);
-      } else {
+      if (!silent) {
         setLoading(true);
       }
 
@@ -105,7 +101,6 @@ export function PaymentResultPage() {
         setErrorMessage(getApiErrorMessage(error, 'Vui lòng thử lại sau.'));
       } finally {
         setLoading(false);
-        setRefreshing(false);
       }
     },
     [paymentContext.invoiceId, paymentContext.paymentId],
@@ -145,9 +140,6 @@ export function PaymentResultPage() {
         <Card className="payment-result-card mx-auto max-w-3xl">
           <Empty description={errorMessage || 'Không tìm thấy giao dịch cần kiểm tra'}>
             <Space wrap>
-              <Button icon={<ReloadOutlined />} onClick={() => void fetchPaymentStatus()}>
-                Kiểm tra lại
-              </Button>
               <Button type="primary" onClick={() => navigate('/services')}>
                 Chọn dịch vụ
               </Button>
@@ -185,15 +177,6 @@ export function PaymentResultPage() {
             subTitle={paymentStatusDescriptions[payment.status]}
             extra={
               <Space wrap>
-                {isPending ? (
-                  <Button
-                    icon={<ReloadOutlined />}
-                    loading={refreshing}
-                    onClick={() => void fetchPaymentStatus(true)}
-                  >
-                    Kiểm tra lại
-                  </Button>
-                ) : null}
                 {isFailed ? (
                   <Button type="primary" onClick={() => navigate(invoiceCheckoutUrl)}>
                     Thanh toán lại
