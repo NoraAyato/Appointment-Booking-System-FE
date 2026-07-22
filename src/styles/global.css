@@ -9,6 +9,238 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.booking-history-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.appointment-history-card {
+  border: 1px solid rgba(231, 226, 216, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 18px 42px rgba(23, 34, 59, 0.055);
+}
+
+.appointment-history-card .ant-card-body {
+  padding: 18px;
+}
+
+.appointment-history-item {
+  display: grid;
+  grid-template-columns: 380px minmax(0, 1fr) 170px;
+  gap: 16px;
+  align-items: center;
+}
+
+.appointment-history-image-wrap {
+  position: relative;
+  height: 174px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #e8e1d6;
+}
+
+.appointment-history-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.appointment-history-category {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  margin: 0;
+  border: 0;
+  font-weight: 700;
+}
+
+.appointment-history-price {
+  width: 100%;
+  padding: 12px;
+  text-align: center;
+  background: #fbfaf7;
+  border: 1px solid #ece7dc;
+  border-radius: 8px;
+}
+
+.appointment-history-price strong {
+  display: block;
+  color: #214f45;
+  font-size: 21px;
+  line-height: 1.15;
+}
+
+.appointment-history-content {
+  min-width: 0;
+}
+
+.appointment-history-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 46px;
+  margin-bottom: 9px;
+}
+
+.appointment-history-meta-grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.5fr 0.75fr 1fr;
+  gap: 7px;
+}
+
+.appointment-history-meta-grid>div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 7px 9px;
+  color: #334155;
+  background: #ffffff;
+  border: 1px solid #ece7dc;
+  border-radius: 8px;
+}
+
+.appointment-history-meta-grid svg {
+  flex: 0 0 auto;
+  color: #2f7d67;
+}
+
+.appointment-history-meta-grid span {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appointment-history-note {
+  display: flex;
+  gap: 9px;
+  margin-top: 9px;
+  padding: 9px 11px;
+  color: #475569;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+}
+
+.appointment-history-staff-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 9px;
+  padding: 9px 11px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.appointment-history-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  align-self: stretch;
+}
+
+.appointment-history-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.appointment-history-actions .ant-btn {
+  width: 100%;
+}
+
+.appointment-history-note svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: #c2410c;
+}
+
+.booking-history-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  background: #ffffff;
+  border: 1px solid rgba(231, 226, 216, 0.95);
+  border-radius: 8px;
+}
+
+@media (max-width: 1180px) {
+  .appointment-history-item {
+    grid-template-columns: 340px minmax(0, 1fr);
+  }
+
+  .appointment-history-side {
+    grid-column: 2;
+    flex-direction: row;
+  }
+
+  .appointment-history-price {
+    max-width: 190px;
+  }
+
+  .appointment-history-actions {
+    align-content: start;
+    margin-left: auto;
+  }
+
+  .appointment-history-image-wrap,
+  .appointment-history-image {
+    height: 160px;
+  }
+
+  .appointment-history-meta-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .booking-history-hero,
+  .booking-history-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .booking-history-hero .ant-btn,
+  .booking-history-pagination>.flex {
+    width: 100%;
+  }
+
+  .appointment-history-price {
+    width: 100%;
+    max-width: none;
+    text-align: left;
+  }
+
+  .appointment-history-item {
+    grid-template-columns: 1fr;
+  }
+
+  .appointment-history-side {
+    grid-column: auto;
+    flex-direction: column;
+  }
+
+  .appointment-history-heading,
+  .appointment-history-staff-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .appointment-history-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 body {
   margin: 0;
   color: #17223b;

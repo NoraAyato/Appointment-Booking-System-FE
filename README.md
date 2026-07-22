@@ -174,6 +174,7 @@ TanStack Query được dùng cho các dữ liệu `GET` có thể cache/refetch
 - Top services ở trang chủ.
 - Top reviews ở trang chủ.
 - Review stats và review pagination ở trang chi tiết dịch vụ.
+- Lịch sử đặt dịch vụ của người dùng ở `/booking-history`.
 
 Quy ước hiện tại:
 
@@ -258,6 +259,7 @@ npm run g <name> # Generate skeleton feature
 
 ## Tài Liệu Nội Bộ
 
+- `PROJECT_FLOW.md`: phân tích flow hiện tại của frontend.
 - `TASK_LOG.md`: lịch sử các nhóm việc đã triển khai.
 
 ## Trạng Thái Chất Lượng

@@ -85,3 +85,45 @@ export interface AppointmentBookingConfirmState {
   service: AppointmentBookingServiceSnapshot;
   staff: AppointmentBookingStaffSnapshot;
 }
+
+export type AppointmentHistoryStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+export type AppointmentHistoryInvoiceStatus = 'PAID' | 'UNPAID' | 'CANCELLED' | 'REFUNDED';
+export type AppointmentHistoryPaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELLED';
+export type AppointmentHistoryPaymentMethod = 'MOMO' | 'CASH';
+
+export interface AppointmentHistoryItem {
+  appointmentDetailId: number;
+  appointmentId: string;
+  appointmentStatus: AppointmentHistoryStatus;
+  bookingDate: string;
+  categoryColorTag: string;
+  categoryName: string;
+  durationMinutes: number;
+  endTime: string;
+  invoiceAmount: number;
+  invoiceId: string;
+  invoiceStatus: AppointmentHistoryInvoiceStatus;
+  note: string | null;
+  paymentMethod: AppointmentHistoryPaymentMethod | null;
+  paymentStatus: AppointmentHistoryPaymentStatus | null;
+  promotionCode: string | null;
+  quantity: number;
+  reviewed: boolean;
+  serviceId: string;
+  serviceImage: string | null;
+  serviceName: string;
+  staffAvatar: string | null;
+  staffId: string;
+  staffName: string;
+  startTime: string;
+}
+
+export interface AppointmentHistoryModel extends AppointmentHistoryItem {
+  serviceImageUrl?: string;
+  staffAvatarUrl?: string;
+}
+
+export interface AppointmentHistoryFilterParams {
+  page: number;
+  limit: number;
+}

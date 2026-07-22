@@ -1,93 +1,308 @@
-import { CalendarOutlined } from '@ant-design/icons';
-import { Card, Space, Table, Tag, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import { useEffect, useState } from 'react';
+import {
+  CalendarOutlined,
+  ClockCircleOutlined,
+  CreditCardOutlined,
+  FileTextOutlined,
+  ReloadOutlined,
+  StarOutlined,
+  TeamOutlined,
+} from '@ant-design/icons';
+import {
+  Avatar,
+  Button,
+  Card,
+  Empty,
+  Skeleton,
+  Space,
+  Tag,
+  Typography,
+  notification,
+} from 'antd';
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { formatDateTime } from '@/shared/utils/date-format';
+import fallbackServiceImage from '@/assets/appointment-hero.png';
+import { AppPagination } from '@/shared/components/AppPagination';
+import { getApiErrorMessage } from '@/shared/utils/api-error';
+import { getAvatarInitial } from '@/shared/utils/avatar';
+import { formatDate, formatTimeRange } from '@/shared/utils/date-format';
 
-import { appointmentApi } from '../api/appointment-api';
-import type { Appointment } from '../types/appointment-type';
+import { appointmentHistoryPaymentMethodLabels } from '../constants/appointment-history-display';
+import { useAppointmentHistoryQuery } from '../hooks/useAppointmentHistoryQuery';
+import type { AppointmentHistoryModel } from '../types/appointment-type';
 
-const statusColor: Record<Appointment['status'], string> = {
-  confirmed: 'green',
-  pending: 'gold',
-  completed: 'blue',
-  cancelled: 'red',
+const DEFAULT_BOOKING_HISTORY_PAGE_SIZE = 3;
+
+const formatCurrency = (value?: number | null) =>
+  `${Number(value ?? 0).toLocaleString('vi-VN')}đ`;
+
+const getPaymentMethodLabel = (appointment: AppointmentHistoryModel) => {
+  if (!appointment.paymentMethod) {
+    return 'Chưa chọn';
+  }
+
+  return appointmentHistoryPaymentMethodLabels[appointment.paymentMethod] ?? appointment.paymentMethod;
 };
 
-const columns: ColumnsType<Appointment> = [
-  {
-    title: 'Mã lịch',
-    dataIndex: 'id',
-    key: 'id',
-    render: (value) => <span className="font-semibold text-ink">{value}</span>,
-  },
-  {
-    title: 'Dịch vụ',
-    dataIndex: 'serviceName',
-    key: 'serviceName',
-  },
-  {
-    title: 'Chuyên viên',
-    dataIndex: 'specialistName',
-    key: 'specialistName',
-  },
-  {
-    title: 'Thời gian',
-    dataIndex: 'scheduledAt',
-    key: 'scheduledAt',
-    render: (value) => formatDateTime(value),
-  },
-  {
-    title: 'Trạng thái',
-    dataIndex: 'status',
-    key: 'status',
-    render: (value: Appointment['status']) => <Tag color={statusColor[value]}>{value}</Tag>,
-  },
-  {
-    title: 'Chi phí',
-    dataIndex: 'price',
-    key: 'price',
-    align: 'right',
-    render: (value) => `${Number(value).toLocaleString('vi-VN')}đ`,
-  },
-];
+function AppointmentHistorySkeleton() {
+  return (
+    <div className="grid gap-4">
+      {Array.from({ length: DEFAULT_BOOKING_HISTORY_PAGE_SIZE }).map((_, index) => (
+        <Card key={index} className="appointment-history-card">
+          <Skeleton active avatar paragraph={{ rows: 4 }} />
+        </Card>
+      ))}
+    </div>
+  );
+}
 
-export function AppointmentHistoryPage() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
+interface AppointmentHistoryCardProps {
+  appointment: AppointmentHistoryModel;
+  onPayInvoice: (invoiceId: string) => void;
+  onReview: (appointment: AppointmentHistoryModel) => void;
+}
 
-  useEffect(() => {
-    appointmentApi.getBookingHistory().then((response) => {
-      setAppointments(response.data);
-      setLoading(false);
-    });
-  }, []);
+function AppointmentHistoryCard({
+  appointment,
+  onPayInvoice,
+  onReview,
+}: AppointmentHistoryCardProps) {
+  const isUnpaid = appointment.invoiceStatus === 'UNPAID';
+  const isPaid = appointment.invoiceStatus === 'PAID';
+  const canPayInvoice =
+    isUnpaid && Boolean(appointment.invoiceId?.trim()) && appointment.appointmentStatus !== 'CANCELLED';
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 md:px-8">
-      <Space className="mb-6" align="center">
-        <CalendarOutlined className="text-2xl text-sage" />
-        <div>
-          <Typography.Title level={2} className="!mb-0">
-            Lịch sử đặt dịch vụ
-          </Typography.Title>
-          <Typography.Text className="text-slate-500">
-            Theo dõi lịch sắp tới và các buổi đã hoàn thành.
-          </Typography.Text>
+    <Card className="appointment-history-card overflow-hidden">
+      <div className="appointment-history-item">
+        <div className="appointment-history-image-wrap">
+          <img
+            alt={appointment.serviceName}
+            className="appointment-history-image"
+            src={appointment.serviceImageUrl || fallbackServiceImage}
+          />
+          <Tag
+            className="appointment-history-category"
+            color={appointment.categoryColorTag || 'default'}
+          >
+            {appointment.categoryName}
+          </Tag>
         </div>
-      </Space>
 
-      <Card>
-        <Table
-          rowKey="id"
-          loading={loading}
-          dataSource={appointments}
-          columns={columns}
-          pagination={{ pageSize: 6 }}
-          scroll={{ x: 860 }}
-        />
-      </Card>
+        <div className="appointment-history-content">
+          <div className="appointment-history-heading">
+            <div className="min-w-0">
+              {isUnpaid ? (
+                <Space size={8} wrap className="mb-2">
+                  <Tag color="orange">Chưa thanh toán</Tag>
+                </Space>
+              ) : null}
+              {isPaid ? (
+                <Space size={8} wrap className="mb-2">
+                  <Tag color="green">Đã thanh toán</Tag>
+                </Space>
+              ) : null}
+              <Typography.Title level={4} className="!mb-1 !text-ink">
+                {appointment.serviceName}
+              </Typography.Title>
+              <Typography.Text className="block !text-sm !text-slate-500">
+                Mã lịch: {appointment.appointmentId}
+              </Typography.Text>
+            </div>
+          </div>
+
+          <div className="appointment-history-meta-grid">
+            <div>
+              <CalendarOutlined />
+              <span>{formatDate(appointment.bookingDate)}</span>
+            </div>
+            <div>
+              <ClockCircleOutlined />
+              <span>
+                {formatTimeRange(appointment.startTime, appointment.endTime)} ·{' '}
+                {appointment.durationMinutes} phút
+              </span>
+            </div>
+            <div>
+              <TeamOutlined />
+              <span>{appointment.quantity} khách</span>
+            </div>
+            <div>
+              <CreditCardOutlined />
+              <span>{getPaymentMethodLabel(appointment)}</span>
+            </div>
+          </div>
+
+          <div className="appointment-history-staff-row">
+            <Space size={12}>
+              <Avatar size={42} src={appointment.staffAvatarUrl}>
+                {getAvatarInitial(appointment.staffName)}
+              </Avatar>
+              <div>
+                <Typography.Text className="block !text-xs !font-semibold uppercase !text-slate-400">
+                  Nhân viên phụ trách
+                </Typography.Text>
+                <Typography.Text className="!font-semibold !text-ink">
+                  {appointment.staffName}
+                </Typography.Text>
+              </div>
+            </Space>
+
+            <Space size={8} wrap>
+              {appointment.promotionCode ? (
+                <Tag color="purple">Mã {appointment.promotionCode}</Tag>
+              ) : null}
+            </Space>
+          </div>
+
+          {appointment.note ? (
+            <div className="appointment-history-note">
+              <FileTextOutlined />
+              <span>{appointment.note}</span>
+            </div>
+          ) : null}
+        </div>
+
+        <aside className="appointment-history-side">
+          <div className="appointment-history-price">
+            <Typography.Text className="block !text-xs !font-semibold uppercase !text-slate-400">
+              Tổng thanh toán
+            </Typography.Text>
+            <strong>{formatCurrency(appointment.invoiceAmount)}</strong>
+          </div>
+
+          <div className="appointment-history-actions">
+            {!appointment.reviewed ? (
+              <Button icon={<StarOutlined />} onClick={() => onReview(appointment)}>
+                Đánh giá
+              </Button>
+            ) : null}
+            {canPayInvoice ? (
+              <Button
+                type="primary"
+                icon={<CreditCardOutlined />}
+                onClick={() => onPayInvoice(appointment.invoiceId)}
+              >
+                Tiếp tục thanh toán
+              </Button>
+            ) : null}
+          </div>
+        </aside>
+      </div>
+    </Card>
+  );
+}
+
+export function AppointmentHistoryPage() {
+  const navigate = useNavigate();
+  const [toast, toastContextHolder] = notification.useNotification();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_BOOKING_HISTORY_PAGE_SIZE);
+  const queryParams = useMemo(
+    () => ({
+      limit: pageSize,
+      page,
+    }),
+    [page, pageSize],
+  );
+  const {
+    data: bookingHistory,
+    error,
+    isError,
+    isFetching,
+    isLoading,
+    refetch,
+  } = useAppointmentHistoryQuery(queryParams);
+
+  const appointments = bookingHistory?.items ?? [];
+  const total = bookingHistory?.total ?? 0;
+
+  const handlePayInvoice = (invoiceId: string) => {
+    navigate(`/invoices/checkout?invoiceId=${encodeURIComponent(invoiceId)}`);
+  };
+
+  const handleReview = (appointment: AppointmentHistoryModel) => {
+    toast.info({
+      message: 'Đánh giá dịch vụ',
+      description: `Chức năng đánh giá ${appointment.serviceName} sẽ được triển khai ở bước tiếp theo.`,
+      placement: 'topRight',
+    });
+  };
+
+  return (
+    <main className="booking-history-page bg-[#f7f4ee] px-4 py-8 md:px-8 md:py-12">
+      {toastContextHolder}
+      <section className="mx-auto max-w-7xl">
+        <div className="booking-history-hero mb-6">
+          <div>
+            <Typography.Text className="!font-semibold uppercase tracking-[0.18em] !text-sage">
+              Lịch sử đặt dịch vụ
+            </Typography.Text>
+            <Typography.Title level={2} className="!mb-2 !mt-2 !text-ink">
+              Theo dõi toàn bộ lịch hẹn của bạn
+            </Typography.Title>
+            <Typography.Text className="max-w-2xl !text-slate-500">
+              Kiểm tra thông tin dịch vụ, thời gian, nhân viên phụ trách, ghi chú và thanh toán
+              của từng lịch hẹn tại HomeFeel.
+            </Typography.Text>
+          </div>
+          <Button icon={<ReloadOutlined />} loading={isFetching} onClick={() => void refetch()}>
+            Làm mới
+          </Button>
+        </div>
+
+        {isLoading ? (
+          <AppointmentHistorySkeleton />
+        ) : isError ? (
+          <Card>
+            <Empty description={getApiErrorMessage(error, 'Vui lòng thử lại sau.')}>
+              <Button icon={<ReloadOutlined />} onClick={() => void refetch()}>
+                Tải lại lịch sử
+              </Button>
+            </Empty>
+          </Card>
+        ) : appointments.length > 0 ? (
+          <div className="grid gap-4">
+            {appointments.map((appointment) => (
+              <AppointmentHistoryCard
+                appointment={appointment}
+                key={appointment.appointmentDetailId}
+                onPayInvoice={handlePayInvoice}
+                onReview={handleReview}
+              />
+            ))}
+          </div>
+        ) : (
+          <Card>
+            <Empty description="Bạn chưa có lịch hẹn nào">
+              <Button type="primary" onClick={() => navigate('/services')}>
+                Khám phá dịch vụ
+              </Button>
+            </Empty>
+          </Card>
+        )}
+
+        {total > 0 ? (
+          <div className="booking-history-pagination mt-6">
+            <Typography.Text className="!text-sm !text-slate-500">
+              Trang {page} trên {Math.max(1, Math.ceil(total / pageSize))}
+            </Typography.Text>
+            <AppPagination
+              current={page}
+              disabled={isFetching}
+              onChange={(nextPage, nextPageSize) => {
+                setPage(nextPage);
+                setPageSize(nextPageSize);
+              }}
+              pageSize={pageSize}
+              pageSizeOptions={[3, 6, 9]}
+              showSizeChanger={false}
+              showTotal={false}
+              total={total}
+            />
+          </div>
+        ) : null}
+      </section>
     </main>
   );
 }
