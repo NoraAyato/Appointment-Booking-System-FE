@@ -28,10 +28,10 @@ import { StaffShiftsPage } from '@/features/staff-shifts/pages/StaffShiftsPage';
 import { HomePage } from '@/features/home/pages/HomePage';
 import { InvoiceCheckoutPage } from '@/features/invoices/pages/InvoiceCheckoutPage';
 import { PaymentResultPage } from '@/features/payments/pages/PaymentResultPage';
-import { ProfilePage } from '@/features/profile/pages/ProfilePage';
 import { PromotionsPage } from '@/features/promotions/pages/PromotionsPage';
 import { ServiceDetailPage } from '@/features/public-services/pages/ServiceDetailPage';
 import { ServicesPage } from '@/features/public-services/pages/ServicesPage';
+import { ProfilePage } from '@/features/users/pages/ProfilePage';
 import { AppRouteError } from '@/shared/components/AppRouteError';
 
 import { ProtectedRoute } from './ProtectedRoute';
