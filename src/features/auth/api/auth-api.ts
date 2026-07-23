@@ -1,54 +1,82 @@
-import type { LoginPayload, User } from '../types/auth-type';
+import { axiosClient } from '@/shared/lib/axios';
+import type { ApiResponse } from '@/shared/types/api-type';
 
-const MOCK_USERS: Record<LoginPayload['role'], User> = {
-  customer: {
-    id: 'usr-001',
-    fullName: 'Minh Anh',
-    email: 'customer@yoedu.vn',
-    role: 'customer',
-    avatarUrl: 'https://i.pravatar.cc/120?img=47',
-    phone: '090 234 8899',
-  },
-  staff: {
-    id: 'usr-102',
-    fullName: 'Hoàng Staff',
-    email: 'staff@yoedu.vn',
-    role: 'staff',
-    avatarUrl: 'https://i.pravatar.cc/120?img=12',
-    phone: '090 811 7722',
-  },
-  admin: {
-    id: 'usr-900',
-    fullName: 'Linh Admin',
-    email: 'admin@yoedu.vn',
-    role: 'admin',
-    avatarUrl: 'https://i.pravatar.cc/120?img=32',
-    phone: '091 555 1188',
-  },
-};
-
-const delay = (duration = 450) => new Promise((resolve) => window.setTimeout(resolve, duration));
+import type {
+  ChangePasswordPayload,
+  ForgotPasswordPayload,
+  GoogleLoginPayload,
+  LoginPayload,
+  RegisterPayload,
+  ResetPasswordPayload,
+  SendOtpData,
+  SendOtpPayload,
+  VerifyOtpPayload,
+} from '../types/auth-type';
 
 export const authApi = {
+  sendOtp: async (payload: SendOtpPayload) => {
+    const response = await axiosClient.post<ApiResponse<SendOtpData>>('/auth/send-otp', payload);
+
+    return response.data;
+  },
+
+  verifyOtp: async (payload: VerifyOtpPayload) => {
+    const response = await axiosClient.post<ApiResponse<null>>('/auth/verify-otp', payload);
+
+    return response.data;
+  },
+
   login: async (payload: LoginPayload) => {
-    await delay();
+    const response = await axiosClient.post<ApiResponse<null>>('/auth/login', payload);
 
-    if (!payload.email || !payload.password) {
-      throw new Error('Vui lòng nhập email và mật khẩu.');
-    }
+    return response.data;
+  },
 
-    return {
-      message: 'Đăng nhập thành công',
-      data: MOCK_USERS[payload.role],
+  register: async (payload: RegisterPayload) => {
+    const registerPayload = {
+      email: payload.email,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      password: payload.password,
     };
+    const response = await axiosClient.post<ApiResponse<null>>('/auth/register', registerPayload);
+
+    return response.data;
+  },
+
+  refreshToken: async () => {
+    const response = await axiosClient.post<ApiResponse<null>>('/auth/refresh-token');
+
+    return response.data;
+  },
+
+  forgotPassword: async (payload: ForgotPasswordPayload) => {
+    const response = await axiosClient.post<ApiResponse<null>>('/auth/forgot-password', payload);
+
+    return response.data;
+  },
+
+  resetPassword: async (payload: ResetPasswordPayload) => {
+    const response = await axiosClient.post<ApiResponse<null>>('/auth/reset-password', payload);
+
+    return response.data;
+  },
+
+  changePassword: async (payload: ChangePasswordPayload) => {
+    const response = await axiosClient.post<ApiResponse<null>>('/auth/change-password', payload);
+
+    return response.data;
+  },
+
+  googleLogin: async (payload: GoogleLoginPayload) => {
+    const response = await axiosClient.post<ApiResponse<null>>('/auth/google', payload);
+
+    return response.data;
   },
 
   logout: async () => {
-    await delay(250);
+    const response = await axiosClient.post<ApiResponse<null>>('/auth/logout');
 
-    return {
-      message: 'Đã đăng xuất',
-      data: null,
-    };
+    return response.data;
   },
 };

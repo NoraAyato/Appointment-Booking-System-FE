@@ -1,0 +1,645 @@
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from '@ant-design/icons';
+import {
+  Avatar,
+  Button,
+  Card,
+  DatePicker,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Space,
+  Switch,
+  Tag,
+  TimePicker,
+  Tooltip,
+  Typography,
+  notification,
+} from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import type { Dayjs } from 'dayjs';
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+import { DashboardPage } from '@/features/dashboard/components/DashboardPage';
+import { adminUserRoleAdminApi } from '@/features/admin-users/api/admin-user-api';
+import type { AdminStaffOption } from '@/features/admin-users/types/admin-user-type';
+import { AppSelect } from '@/shared/components/AppSelect';
+import { DataTable } from '@/shared/components/DataTable';
+import { useTable } from '@/shared/hooks/useTable';
+import { getApiErrorMessage } from '@/shared/utils/api-error';
+import { getAssetUrl } from '@/shared/utils/asset-url';
+import { getAvatarInitial } from '@/shared/utils/avatar';
+import {
+  formatDate as formatDisplayDate,
+  formatTimeRange as formatDisplayTimeRange,
+} from '@/shared/utils/date-format';
+
+import { adminBlockedSlotRoleAdminApi } from '../api/admin-blocked-slot-api';
+import {
+  ADMIN_BLOCKED_SLOT_DEFAULT_STATUS_OPTIONS,
+  ADMIN_BLOCKED_SLOT_MANUAL_STATUS_OPTIONS,
+  ADMIN_BLOCKED_SLOT_STATUS_OPTIONS,
+  getAdminBlockedSlotStatusMeta,
+} from '../constants/admin-blocked-slot-options';
+import type {
+  AdminBlockedSlot,
+  AdminBlockedSlotFilterParams,
+  AdminBlockedSlotFormValues,
+  CreateAdminBlockedSlotPayload,
+  UpdateAdminBlockedSlotStatusPayload,
+} from '../types/admin-blocked-slot-type';
+
+type BlockedSlotFilterFormValues = Pick<AdminBlockedSlotFilterParams, 'keyWord' | 'status'>;
+
+const ALL_STAFF_VALUE = '__ALL_STAFF__';
+
+const toCreatePayload = (values: AdminBlockedSlotFormValues): CreateAdminBlockedSlotPayload => ({
+  blockedDate: values.isEveryDay ? null : (values.blockedDate?.format('YYYY-MM-DD') ?? null),
+  endTime: values.isAllDay ? null : (values.endTime?.format('HH:mm:ss') ?? null),
+  reason: values.reason.trim(),
+  startTime: values.isAllDay ? null : (values.startTime?.format('HH:mm:ss') ?? null),
+  status: values.userId && values.userId !== ALL_STAFF_VALUE ? values.status : 'DEFAULT',
+  userId: values.userId && values.userId !== ALL_STAFF_VALUE ? values.userId : null,
+});
+
+export function AdminBlockedSlotsPage() {
+  const [filterForm] = Form.useForm<BlockedSlotFilterFormValues>();
+  const [createForm] = Form.useForm<AdminBlockedSlotFormValues>();
+  const [updateStatusForm] = Form.useForm<UpdateAdminBlockedSlotStatusPayload>();
+  const [toast, toastContextHolder] = notification.useNotification();
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [selectedBlockedSlot, setSelectedBlockedSlot] = useState<AdminBlockedSlot | null>(null);
+  const [mutationLoading, setMutationLoading] = useState(false);
+  const [staffOptions, setStaffOptions] = useState<AdminStaffOption[]>([]);
+  const [staffOptionsLoading, setStaffOptionsLoading] = useState(false);
+  const lastListErrorRef = useRef<string | null>(null);
+  const selectedCreateUserId = Form.useWatch('userId', createForm);
+  const isEveryDay = Form.useWatch('isEveryDay', createForm);
+  const isAllDay = Form.useWatch('isAllDay', createForm);
+
+  const {
+    currentPage,
+    error,
+    filters,
+    handleFilterChange,
+    handlePageChange,
+    items,
+    loading,
+    pageSize,
+    refetch,
+    resetFilters,
+    total,
+  } = useTable<AdminBlockedSlot, AdminBlockedSlotFilterParams>({
+    fetchData: adminBlockedSlotRoleAdminApi.getAll,
+    initialPageSize: 10,
+  });
+
+  const staffSelectOptions = useMemo(
+    () => [
+      {
+        label: 'Tất cả nhân viên',
+        value: ALL_STAFF_VALUE,
+      },
+      ...staffOptions.map((staff) => ({
+        label: staff.name,
+        value: staff.id,
+      })),
+    ],
+    [staffOptions],
+  );
+
+  const isAllStaffSelected = !selectedCreateUserId || selectedCreateUserId === ALL_STAFF_VALUE;
+  const createStatusOptions = isAllStaffSelected
+    ? ADMIN_BLOCKED_SLOT_DEFAULT_STATUS_OPTIONS
+    : ADMIN_BLOCKED_SLOT_MANUAL_STATUS_OPTIONS;
+
+  useEffect(() => {
+    if (!error || lastListErrorRef.current === error) {
+      return;
+    }
+
+    lastListErrorRef.current = error;
+    toast.error({
+      message: 'Không thể tải danh sách khóa lịch',
+      description: error,
+      placement: 'topRight',
+    });
+  }, [error, toast]);
+
+  const fetchStaffOptions = async () => {
+    setStaffOptionsLoading(true);
+
+    try {
+      const response = await adminUserRoleAdminApi.getStaffOptions();
+
+      if (!response.success) {
+        throw new Error(response.message || 'Không thể tải danh sách nhân viên.');
+      }
+
+      setStaffOptions(response.data);
+    } catch (staffOptionsError) {
+      toast.error({
+        message: 'Không thể tải danh sách nhân viên',
+        description: getApiErrorMessage(staffOptionsError, 'Vui lòng thử lại sau.'),
+        placement: 'topRight',
+      });
+    } finally {
+      setStaffOptionsLoading(false);
+    }
+  };
+
+  const openCreateModal = () => {
+    createForm.resetFields();
+    createForm.setFieldsValue({
+      isAllDay: false,
+      isEveryDay: false,
+      status: 'DEFAULT',
+      userId: ALL_STAFF_VALUE,
+    });
+    setCreateModalOpen(true);
+
+    if (!staffOptions.length) {
+      void fetchStaffOptions();
+    }
+  };
+
+  const closeCreateModal = () => {
+    setCreateModalOpen(false);
+    createForm.resetFields();
+  };
+
+  const openUpdateStatusModal = (blockedSlot: AdminBlockedSlot) => {
+    setSelectedBlockedSlot(blockedSlot);
+    updateStatusForm.setFieldsValue({
+      status: blockedSlot.status as UpdateAdminBlockedSlotStatusPayload['status'],
+    });
+  };
+
+  const closeUpdateStatusModal = () => {
+    setSelectedBlockedSlot(null);
+    updateStatusForm.resetFields();
+  };
+
+  const handleEveryDayChange = (checked: boolean) => {
+    if (checked) {
+      createForm.setFieldValue('blockedDate', null);
+    }
+  };
+
+  const handleAllDayChange = (checked: boolean) => {
+    if (!checked) {
+      return;
+    }
+
+    createForm.setFieldsValue({
+      endTime: null,
+      isEveryDay: false,
+      startTime: null,
+    });
+  };
+
+  const handleStaffChange = (value?: string) => {
+    createForm.setFieldValue('status', value && value !== ALL_STAFF_VALUE ? 'PENDING' : 'DEFAULT');
+  };
+
+  const handleCreateBlockedSlot = async (values: AdminBlockedSlotFormValues) => {
+    setMutationLoading(true);
+
+    try {
+      const response = await adminBlockedSlotRoleAdminApi.create(toCreatePayload(values));
+
+      if (!response.success) {
+        throw new Error(response.message || 'Không thể tạo khóa lịch.');
+      }
+
+      toast.success({
+        message: 'Tạo khóa lịch thành công',
+        description: response.message,
+        placement: 'topRight',
+      });
+      closeCreateModal();
+      await refetch();
+    } catch (createError) {
+      toast.error({
+        message: 'Tạo khóa lịch thất bại',
+        description: getApiErrorMessage(createError, 'Vui lòng thử lại sau.'),
+        placement: 'topRight',
+      });
+    } finally {
+      setMutationLoading(false);
+    }
+  };
+
+  const handleUpdateStatus = async (values: UpdateAdminBlockedSlotStatusPayload) => {
+    if (!selectedBlockedSlot) {
+      return;
+    }
+
+    setMutationLoading(true);
+
+    try {
+      const response = await adminBlockedSlotRoleAdminApi.updateStatus(
+        selectedBlockedSlot.id,
+        values,
+      );
+
+      if (!response.success) {
+        throw new Error(response.message || 'Không thể cập nhật trạng thái khóa lịch.');
+      }
+
+      toast.success({
+        message: 'Cập nhật trạng thái thành công',
+        description: response.message,
+        placement: 'topRight',
+      });
+      closeUpdateStatusModal();
+      await refetch();
+    } catch (updateError) {
+      toast.error({
+        message: 'Cập nhật trạng thái thất bại',
+        description: getApiErrorMessage(updateError, 'Vui lòng thử lại sau.'),
+        placement: 'topRight',
+      });
+    } finally {
+      setMutationLoading(false);
+    }
+  };
+
+  const handleDeleteBlockedSlot = async (blockedSlot: AdminBlockedSlot) => {
+    setMutationLoading(true);
+
+    try {
+      const response = await adminBlockedSlotRoleAdminApi.remove(blockedSlot.id);
+
+      if (!response.success) {
+        throw new Error(response.message || 'Không thể xóa khóa lịch.');
+      }
+
+      toast.success({
+        message: 'Xóa khóa lịch thành công',
+        description: response.message,
+        placement: 'topRight',
+      });
+      await refetch();
+    } catch (deleteError) {
+      toast.error({
+        message: 'Xóa khóa lịch thất bại',
+        description: getApiErrorMessage(deleteError, 'Vui lòng thử lại sau.'),
+        placement: 'topRight',
+      });
+    } finally {
+      setMutationLoading(false);
+    }
+  };
+
+  const columns: ColumnsType<AdminBlockedSlot> = [
+    {
+      title: 'Nhân viên',
+      dataIndex: 'staffName',
+      render: (staffName: string | null, record) => {
+        const displayName = staffName || 'Tất cả nhân viên';
+
+        return (
+          <Space>
+            <Avatar src={getAssetUrl(record.avatarUrl)}>{getAvatarInitial(displayName)}</Avatar>
+            <Typography.Text strong>{displayName}</Typography.Text>
+          </Space>
+        );
+      },
+    },
+    {
+      title: 'Lý do',
+      dataIndex: 'reason',
+      ellipsis: true,
+    },
+    {
+      title: 'Ngày khóa',
+      dataIndex: 'blockedDate',
+      width: 130,
+      render: (value?: string | null) => formatDisplayDate(value, 'Mọi ngày'),
+    },
+    {
+      title: 'Khung giờ',
+      key: 'timeRange',
+      width: 140,
+      render: (_, record) => formatDisplayTimeRange(record.startTime, record.endTime, 'Cả ngày'),
+    },
+    {
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      width: 128,
+      render: (status: string) => {
+        const statusMeta = getAdminBlockedSlotStatusMeta(status);
+
+        return <Tag color={statusMeta.color}>{statusMeta.label}</Tag>;
+      },
+    },
+    {
+      title: 'Thao tác',
+      key: 'actions',
+      fixed: 'right',
+      width: 120,
+      render: (_, record) => (
+        <Space>
+          <Tooltip title="Cập nhật trạng thái">
+            <Button
+              aria-label="Cập nhật trạng thái khóa lịch"
+              icon={<EditOutlined />}
+              onClick={() => openUpdateStatusModal(record)}
+            />
+          </Tooltip>
+          <Popconfirm
+            title="Xóa khóa lịch"
+            description="Bạn có chắc muốn xóa khóa lịch này?"
+            okText="Xóa"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true, loading: mutationLoading }}
+            onConfirm={() => void handleDeleteBlockedSlot(record)}
+          >
+            <Tooltip title="Xóa khóa lịch">
+              <Button aria-label="Xóa khóa lịch" danger icon={<DeleteOutlined />} />
+            </Tooltip>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  const handleSearch = (values: BlockedSlotFilterFormValues) => {
+    handleFilterChange({
+      keyWord: values.keyWord?.trim() || undefined,
+      status: values.status,
+    });
+  };
+
+  const handleReset = () => {
+    filterForm.resetFields();
+    resetFilters();
+  };
+
+  return (
+    <>
+      {toastContextHolder}
+
+      <DashboardPage
+        title="Quản lý khóa lịch"
+        description="Tạo và kiểm soát các khoảng thời gian nhân viên tạm ngưng nhận lịch."
+        actions={
+          <Space>
+            <Button icon={<ReloadOutlined />} loading={loading} onClick={() => void refetch()}>
+              Tải lại
+            </Button>
+            <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
+              Thêm khóa lịch
+            </Button>
+          </Space>
+        }
+      >
+        <Card>
+          <Form<BlockedSlotFilterFormValues>
+            form={filterForm}
+            layout="vertical"
+            initialValues={filters}
+            onFinish={handleSearch}
+          >
+            <div className="grid gap-3 md:grid-cols-[1fr_220px_auto] md:items-end">
+              <Form.Item name="keyWord" label="Tìm kiếm" className="!mb-0">
+                <Input allowClear placeholder="Tên nhân viên hoặc lý do" prefix={<SearchOutlined />} />
+              </Form.Item>
+              <Form.Item name="status" label="Trạng thái" className="!mb-0">
+                <AppSelect
+                  allowClear
+                  options={ADMIN_BLOCKED_SLOT_STATUS_OPTIONS}
+                  placeholder="Tất cả trạng thái"
+                />
+              </Form.Item>
+              <Space className="justify-end">
+                <Button onClick={handleReset}>Đặt lại</Button>
+                <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
+                  Tìm
+                </Button>
+              </Space>
+            </div>
+          </Form>
+        </Card>
+
+        <DataTable<AdminBlockedSlot>
+          rowKey="id"
+          dataSource={items}
+          loading={loading}
+          title="Danh sách khóa lịch"
+          columns={columns}
+          locale={{
+            emptyText: 'Chưa có khóa lịch nào.',
+          }}
+          paginationConfig={{
+            current: currentPage,
+            onChange: handlePageChange,
+            pageSize,
+            total,
+          }}
+        />
+      </DashboardPage>
+
+      <Modal
+        open={createModalOpen}
+        title="Thêm khóa lịch"
+        okText="Tạo khóa lịch"
+        cancelText="Hủy"
+        confirmLoading={mutationLoading}
+        onCancel={closeCreateModal}
+        onOk={() => void createForm.submit()}
+      >
+        <Form<AdminBlockedSlotFormValues>
+          form={createForm}
+          layout="vertical"
+          onFinish={handleCreateBlockedSlot}
+        >
+          <Form.Item name="userId" label="Nhân viên">
+            <AppSelect
+              loading={staffOptionsLoading}
+              options={staffSelectOptions}
+              placeholder="Tất cả nhân viên"
+              onChange={handleStaffChange}
+            />
+          </Form.Item>
+          <Form.Item
+            name="reason"
+            label="Lý do"
+            rules={[{ required: true, message: 'Vui lòng nhập lý do khóa lịch.' }]}
+          >
+            <Input.TextArea rows={3} placeholder="Nhập lý do khóa lịch" />
+          </Form.Item>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Form.Item
+              name="isEveryDay"
+              label="Áp dụng mọi ngày"
+              valuePropName="checked"
+              className="!mb-0"
+            >
+              <Switch
+                checkedChildren="Mọi ngày"
+                disabled={Boolean(isAllDay)}
+                unCheckedChildren="Theo ngày"
+                onChange={handleEveryDayChange}
+              />
+            </Form.Item>
+            <Form.Item
+              name="isAllDay"
+              label="Chặn cả ngày"
+              valuePropName="checked"
+              className="!mb-0"
+            >
+              <Switch
+                checkedChildren="Cả ngày"
+                unCheckedChildren="Theo giờ"
+                onChange={handleAllDayChange}
+              />
+            </Form.Item>
+          </div>
+          <Form.Item
+            name="blockedDate"
+            label="Ngày khóa"
+            dependencies={['isEveryDay', 'isAllDay']}
+            rules={[
+              ({ getFieldValue }) => ({
+                validator(_, value?: Dayjs | null) {
+                  if (getFieldValue('isEveryDay') || value) {
+                    return Promise.resolve();
+                  }
+
+                  return Promise.reject(
+                    new Error('Vui lòng chọn ngày khóa hoặc bật áp dụng mọi ngày.'),
+                  );
+                },
+              }),
+            ]}
+          >
+            <DatePicker
+              className="w-full"
+              disabled={Boolean(isEveryDay)}
+              format="DD/MM/YYYY"
+            />
+          </Form.Item>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Form.Item
+              name="startTime"
+              label="Giờ bắt đầu"
+              dependencies={['isAllDay']}
+              rules={[
+                ({ getFieldValue }) => ({
+                  validator(_, value?: Dayjs | null) {
+                    if (getFieldValue('isAllDay') || value) {
+                      return Promise.resolve();
+                    }
+
+                    return Promise.reject(new Error('Vui lòng chọn giờ bắt đầu.'));
+                  },
+                }),
+              ]}
+            >
+              <TimePicker
+                className="w-full"
+                disabled={Boolean(isAllDay)}
+                format="HH:mm"
+                minuteStep={5}
+              />
+            </Form.Item>
+            <Form.Item
+              name="endTime"
+              label="Giờ kết thúc"
+              dependencies={['startTime', 'isAllDay']}
+              rules={[
+                ({ getFieldValue }) => ({
+                  validator(_, value?: Dayjs | null) {
+                    if (getFieldValue('isAllDay')) {
+                      return Promise.resolve();
+                    }
+
+                    if (!value) {
+                      return Promise.reject(new Error('Vui lòng chọn giờ kết thúc.'));
+                    }
+
+                    const startTime = getFieldValue('startTime') as Dayjs | undefined;
+
+                    if (!value || !startTime || value.isAfter(startTime)) {
+                      return Promise.resolve();
+                    }
+
+                    return Promise.reject(new Error('Giờ kết thúc phải sau giờ bắt đầu.'));
+                  },
+                }),
+              ]}
+            >
+              <TimePicker
+                className="w-full"
+                disabled={Boolean(isAllDay)}
+                format="HH:mm"
+                minuteStep={5}
+              />
+            </Form.Item>
+          </div>
+          <Form.Item
+            name="status"
+            label="Trạng thái"
+            rules={[{ required: true, message: 'Vui lòng chọn trạng thái.' }]}
+          >
+            <AppSelect
+              disabled={isAllStaffSelected}
+              options={createStatusOptions}
+              placeholder="Chọn trạng thái"
+            />
+          </Form.Item>
+          {isAllStaffSelected ? (
+            <Typography.Text className="block !text-xs !text-slate-500">
+              Khóa lịch cho tất cả nhân viên sẽ dùng trạng thái Mặc định.
+            </Typography.Text>
+          ) : null}
+        </Form>
+      </Modal>
+
+      <Modal
+        open={Boolean(selectedBlockedSlot)}
+        title="Cập nhật trạng thái khóa lịch"
+        okText="Lưu thay đổi"
+        cancelText="Hủy"
+        confirmLoading={mutationLoading}
+        onCancel={closeUpdateStatusModal}
+        onOk={() => void updateStatusForm.submit()}
+      >
+        <div className="mb-5">
+          <Typography.Text strong>{selectedBlockedSlot?.staffName || 'Tất cả nhân viên'}</Typography.Text>
+          <div className="text-sm text-slate-500">
+            {selectedBlockedSlot
+              ? `${formatDisplayDate(selectedBlockedSlot.blockedDate, 'Mọi ngày')} | ${formatDisplayTimeRange(
+                  selectedBlockedSlot.startTime,
+                  selectedBlockedSlot.endTime,
+                  'Cả ngày',
+                )}`
+              : null}
+          </div>
+        </div>
+
+        <Form<UpdateAdminBlockedSlotStatusPayload>
+          form={updateStatusForm}
+          layout="vertical"
+          onFinish={handleUpdateStatus}
+        >
+          <Form.Item
+            name="status"
+            label="Trạng thái"
+            rules={[{ required: true, message: 'Vui lòng chọn trạng thái.' }]}
+          >
+            <AppSelect options={ADMIN_BLOCKED_SLOT_STATUS_OPTIONS} placeholder="Chọn trạng thái" />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
+  );
+}

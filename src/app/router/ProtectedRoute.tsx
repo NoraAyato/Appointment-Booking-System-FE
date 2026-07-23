@@ -1,8 +1,8 @@
-import { Result } from 'antd';
+﻿import { Result } from 'antd';
 import { Navigate } from 'react-router-dom';
 
 import { useAppSelector } from '@/app/redux/hooks';
-import type { UserRole } from '@/features/auth/types/auth-type';
+import type { UserRole } from '@/features/users/types/user-type';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
-  const user = useAppSelector((state) => state.auth.user);
+  const user = useAppSelector((state) => state.users.currentUser);
 
   if (!user) {
     return <Navigate to="/" replace />;
@@ -30,3 +30,4 @@ export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
 
   return children;
 }
+
