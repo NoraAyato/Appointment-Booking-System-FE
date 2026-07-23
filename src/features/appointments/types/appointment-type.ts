@@ -127,3 +127,10 @@ export interface AppointmentHistoryFilterParams {
   page: number;
   limit: number;
 }
+
+export interface CreateAppointmentReviewPayload {
+  serviceScore: number;
+  description: string;
+  picture?: File | null;
+}
+

@@ -28,6 +28,7 @@ import { getAvatarInitial } from '@/shared/utils/avatar';
 import { formatDate, formatTimeRange } from '@/shared/utils/date-format';
 
 import { appointmentHistoryPaymentMethodLabels } from '../constants/appointment-history-display';
+import { AppointmentReviewModal } from '../components/AppointmentReviewModal';
 import { useAppointmentHistoryQuery } from '../hooks/useAppointmentHistoryQuery';
 import type { AppointmentHistoryModel } from '../types/appointment-type';
 
@@ -71,6 +72,7 @@ function AppointmentHistoryCard({
   const isPaid = appointment.invoiceStatus === 'PAID';
   const canPayInvoice =
     isUnpaid && Boolean(appointment.invoiceId?.trim()) && appointment.appointmentStatus !== 'CANCELLED';
+  const canReview = appointment.appointmentStatus === 'COMPLETED' && !appointment.reviewed;
 
   return (
     <Card className="appointment-history-card overflow-hidden">
@@ -172,7 +174,7 @@ function AppointmentHistoryCard({
           </div>
 
           <div className="appointment-history-actions">
-            {!appointment.reviewed ? (
+            {canReview ? (
               <Button icon={<StarOutlined />} onClick={() => onReview(appointment)}>
                 Đánh giá
               </Button>
@@ -195,9 +197,11 @@ function AppointmentHistoryCard({
 
 export function AppointmentHistoryPage() {
   const navigate = useNavigate();
-  const [toast, toastContextHolder] = notification.useNotification();
+  const [, toastContextHolder] = notification.useNotification();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_BOOKING_HISTORY_PAGE_SIZE);
+  const [selectedReviewAppointment, setSelectedReviewAppointment] =
+    useState<AppointmentHistoryModel | null>(null);
   const queryParams = useMemo(
     () => ({
       limit: pageSize,
@@ -222,11 +226,7 @@ export function AppointmentHistoryPage() {
   };
 
   const handleReview = (appointment: AppointmentHistoryModel) => {
-    toast.info({
-      message: 'Đánh giá dịch vụ',
-      description: `Chức năng đánh giá ${appointment.serviceName} sẽ được triển khai ở bước tiếp theo.`,
-      placement: 'topRight',
-    });
+    setSelectedReviewAppointment(appointment);
   };
 
   return (
@@ -303,6 +303,12 @@ export function AppointmentHistoryPage() {
           </div>
         ) : null}
       </section>
+      <AppointmentReviewModal
+        appointment={selectedReviewAppointment}
+        open={Boolean(selectedReviewAppointment)}
+        onClose={() => setSelectedReviewAppointment(null)}
+        onSuccess={() => void refetch()}
+      />
     </main>
   );
 }
